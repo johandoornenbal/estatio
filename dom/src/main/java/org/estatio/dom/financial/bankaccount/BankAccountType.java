@@ -16,7 +16,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.estatio.dom.financial;
+package org.estatio.dom.financial.bankaccount;
 
 import org.estatio.dom.utils.StringUtils;
 

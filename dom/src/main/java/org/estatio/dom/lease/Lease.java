@@ -61,7 +61,6 @@ import org.estatio.dom.RegexValidation;
 import org.estatio.dom.agreement.Agreement;
 import org.estatio.dom.agreement.AgreementRole;
 import org.estatio.dom.agreement.AgreementRoleCommunicationChannel;
-import org.estatio.dom.agreement.AgreementRoleCommunicationChannelType;
 import org.estatio.dom.agreement.AgreementRoleCommunicationChannelTypes;
 import org.estatio.dom.agreement.AgreementRoleType;
 import org.estatio.dom.agreement.AgreementType;
@@ -71,11 +70,10 @@ import org.estatio.dom.bankmandate.BankMandate;
 import org.estatio.dom.bankmandate.BankMandateConstants;
 import org.estatio.dom.bankmandate.BankMandates;
 import org.estatio.dom.charge.Charge;
-import org.estatio.dom.communicationchannel.CommunicationChannel;
-import org.estatio.dom.communicationchannel.CommunicationChannelType;
 import org.estatio.dom.communicationchannel.CommunicationChannels;
-import org.estatio.dom.financial.BankAccount;
-import org.estatio.dom.financial.FinancialAccounts;
+import org.estatio.dom.financial.FinancialAccount;
+import org.estatio.dom.financial.bankaccount.BankAccount;
+import org.estatio.dom.financial.bankaccount.BankAccounts;
 import org.estatio.dom.invoice.PaymentMethod;
 import org.estatio.dom.invoice.viewmodel.InvoiceSummariesForInvoiceRun;
 import org.estatio.dom.lease.breaks.BreakExerciseType;
@@ -578,7 +576,7 @@ public class Lease
         if (tenantRole == null || !tenantRole.isCurrent()) {
             return "Could not determine the tenant (secondary party) of this lease";
         }
-        final List<BankAccount> validBankAccounts = existingBankAccountsForTenant();
+        final List<? extends FinancialAccount> validBankAccounts = existingBankAccountsForTenant();
         if (validBankAccounts.isEmpty()) {
             return "There are no bank accounts available for this tenant";
         }
@@ -607,7 +605,7 @@ public class Lease
             final String reference,
             final LocalDate startDate,
             final LocalDate endDate) {
-        final List<BankAccount> validBankAccounts = existingBankAccountsForTenant();
+        final List<? extends FinancialAccount> validBankAccounts = existingBankAccountsForTenant();
         if (!validBankAccounts.contains(bankAccount)) {
             return "Bank account is not owned by this lease's tenant";
         }
@@ -954,7 +952,7 @@ public class Lease
     Occupancies occupanciesRepo;
 
     @Inject
-    FinancialAccounts financialAccounts;
+    BankAccounts financialAccounts;
 
     @Inject
     BankMandates bankMandates;

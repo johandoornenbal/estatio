@@ -32,7 +32,7 @@ import org.apache.isis.applib.annotation.ActionSemantics.Of;
 import org.estatio.dom.EstatioDomainService;
 import org.estatio.dom.RegexValidation;
 import org.estatio.dom.agreement.*;
-import org.estatio.dom.financial.BankAccount;
+import org.estatio.dom.financial.bankaccount.BankAccount;
 import org.estatio.dom.party.Party;
 
 @DomainService(menuOrder = "30", repositoryFor = BankMandate.class)

@@ -24,8 +24,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.ObjectUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.Period;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.apache.isis.applib.AbstractFactoryAndRepository;
 import org.apache.isis.applib.ApplicationException;
@@ -62,10 +60,11 @@ import org.estatio.dom.communicationchannel.EmailAddresses;
 import org.estatio.dom.communicationchannel.PhoneOrFaxNumbers;
 import org.estatio.dom.communicationchannel.PostalAddress;
 import org.estatio.dom.communicationchannel.PostalAddresses;
-import org.estatio.dom.financial.BankAccount;
 import org.estatio.dom.financial.FinancialAccountTransaction;
 import org.estatio.dom.financial.FinancialAccountTransactions;
 import org.estatio.dom.financial.FinancialAccounts;
+import org.estatio.dom.financial.bankaccount.BankAccount;
+import org.estatio.dom.financial.bankaccount.BankAccounts;
 import org.estatio.dom.financial.utils.IBANValidator;
 import org.estatio.dom.geography.Countries;
 import org.estatio.dom.geography.Country;
@@ -119,8 +118,6 @@ import org.estatio.services.clock.ClockService;
 
 @Named("Migration")
 public class Api extends AbstractFactoryAndRepository {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Api.class);
 
     @Override
     public String getId() {
@@ -974,7 +971,7 @@ public class Api extends AbstractFactoryAndRepository {
             if (owner == null)
                 return;
             if (bankAccount == null) {
-                bankAccount = financialAccounts.newBankAccount(owner, reference, name == null ? reference : name);
+                bankAccount = bankAccounts.newBankAccount(owner, reference, name == null ? reference : name);
             }
             bankAccount.setIban(iban);
             bankAccount.verifyIban();
@@ -1151,6 +1148,9 @@ public class Api extends AbstractFactoryAndRepository {
 
     @Inject
     private FinancialAccounts financialAccounts;
+
+    @Inject
+    private BankAccounts bankAccounts;
 
     @Inject
     private Invoices invoices;
