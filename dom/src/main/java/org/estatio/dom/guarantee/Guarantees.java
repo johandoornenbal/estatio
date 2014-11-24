@@ -85,7 +85,7 @@ public class Guarantees extends EstatioDomainService<Guarantee> {
             final @Named("Start date") LocalDate startDate,
             final @Named("End date") @Optional LocalDate endDate,
             final @Named("Description") String description,
-            final @Named("Contractual amount") BigDecimal contractualAmount,
+            final @Named("Contractual amount") @Optional BigDecimal contractualAmount,
             final @Named("Start amount") BigDecimal startAmount
             ) {
 
@@ -107,6 +107,13 @@ public class Guarantees extends EstatioDomainService<Guarantee> {
         guarantee.setLease(lease);
         guarantee.setContractualAmount(contractualAmount);
 
+        guarantee.newRole(
+                artGuarantee,
+                leasePrimaryParty, null, null);
+        guarantee.newRole(
+                artGuarantor,
+                leaseSecondaryParty, null, null);
+
         FinancialAccountType financialAccountType = guaranteeType.getFinancialAccountType();
         if (financialAccountType != null) {
             FinancialAccount financialAccount = financialAccounts.newFinancialAccount(
@@ -115,19 +122,12 @@ public class Guarantees extends EstatioDomainService<Guarantee> {
                     name,
                     leaseSecondaryParty);
             guarantee.setFinancialAccount(financialAccount);
+            if (startAmount != null) {
+                newTransaction(guarantee, startDate, null, contractualAmount);
+            }
         }
-
-        guarantee.newRole(
-                artGuarantee,
-                leasePrimaryParty, null, null);
-        guarantee.newRole(
-                artGuarantor,
-                leaseSecondaryParty, null, null);
 
         persistIfNotAlready(guarantee);
-        if (startAmount != null) {
-            newTransaction(guarantee, startDate, null, contractualAmount);
-        }
         return guarantee;
     }
 
