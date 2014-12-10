@@ -66,15 +66,31 @@ public class EstatioIntegTestBuilder extends IsisSystemForTest.Builder {
         // testConfiguration.put("isis.persistor.datanucleus.impl.javax.jdo.option.ConnectionURL",
         // "jdbc:hsqldb:mem:test;sqllog=3");
 
-        //
-        // testConfiguration.put("isis.persistor.datanucleus.impl.javax.jdo.option.ConnectionURL",
-        // "jdbc:sqlserver://localhost:1433;instance=.;databaseName=estatio");
-        // testConfiguration.put("isis.persistor.datanucleus.impl.javax.jdo.option.ConnectionDriverName",
-        // "com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        // testConfiguration.put("isis.persistor.datanucleus.impl.javax.jdo.option.ConnectionUserName",
-        // "estatio");
-        // testConfiguration.put("isis.persistor.datanucleus.impl.javax.jdo.option.ConnectionPassword",
-        // "estatio");
+        testConfiguration.put(
+                "isis.persistor.datanucleus.impl.javax.jdo.option.ConnectionURL",
+                "jdbc:h2:mem:test");
+        testConfiguration.put(
+                "isis.persistor.datanucleus.impl.javax.jdo.option.ConnectionDriverName",
+                "org.h2.Driver");
+        testConfiguration.put(
+                "isis.persistor.datanucleus.impl.javax.jdo.option.ConnectionUserName",
+                "sa");
+        testConfiguration.put(
+                "isis.persistor.datanucleus.impl.javax.jdo.option.ConnectionPassword",
+                "sa");
+
+//        testConfiguration.put(
+//                "isis.persistor.datanucleus.impl.javax.jdo.option.ConnectionURL",
+//                "jdbc:sqlserver://localhost:1433;instance=.;databaseName=estatio");
+//        testConfiguration.put(
+//                "isis.persistor.datanucleus.impl.javax.jdo.option.ConnectionDriverName",
+//                "com.microsoft.sqlserver.jdbc.SQLServerDriver");
+//        testConfiguration.put(
+//                "isis.persistor.datanucleus.impl.javax.jdo.option.ConnectionUserName",
+//                "estatio");
+//        testConfiguration.put(
+//                "isis.persistor.datanucleus.impl.javax.jdo.option.ConnectionPassword",
+//                "estatio");
 
         return testConfiguration;
     }

@@ -744,6 +744,12 @@ language governing permissions and limitations under the License.
                 <version>0.10.0</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>1.4.182</version>
+            </dependency>
+
 
         </dependencies>
     </dependencyManagement>
