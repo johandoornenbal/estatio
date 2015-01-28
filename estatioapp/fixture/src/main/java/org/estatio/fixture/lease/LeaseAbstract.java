@@ -66,7 +66,7 @@ public abstract class LeaseAbstract extends EstatioFixtureScript {
             fixtureResults.addResult(this, role);
         }
         if (createLeaseUnitAndTags) {
-            Occupancy occupancy = occupancies.newOccupancy(lease, unit, startDate);
+            Occupancy occupancy = occupancies.newOccupancy(lease, unit, startDate, endDate);
             occupancy.setBrandName(brand);
             occupancy.setSectorName(sector);
             occupancy.setActivityName(activity);

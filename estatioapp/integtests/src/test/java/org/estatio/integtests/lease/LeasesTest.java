@@ -293,8 +293,10 @@ public class LeasesTest extends EstatioIntegrationTest {
             String newName = lease.default1Renew() + "-2";
             LocalDate newStartDate = lease.default2Renew();
             LocalDate newEndDate = new LocalDate(2030, 12, 31);
+            lease.getOccupancies().first().setEndDate(newEndDate);
             Lease newLease = lease.renew(newReference, newName, newStartDate, newEndDate, true);
 
+            assertTrue(lease.getOccupancies().first().getInterval().contains(newStartDate));
             // Old lease
             assertThat(lease.getTenancyEndDate(), is(newStartDate.minusDays(1)));
 

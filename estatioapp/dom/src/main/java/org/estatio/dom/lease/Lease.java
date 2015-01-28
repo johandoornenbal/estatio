@@ -29,6 +29,7 @@ import javax.inject.Inject;
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.InheritanceStrategy;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -74,8 +75,10 @@ import org.estatio.dom.financial.FinancialAccount;
 import org.estatio.dom.financial.bankaccount.BankAccount;
 import org.estatio.dom.financial.bankaccount.BankAccounts;
 import org.estatio.dom.invoice.PaymentMethod;
+import org.estatio.dom.lease.breaks.BreakExerciseType;
 import org.estatio.dom.lease.breaks.BreakOption;
 import org.estatio.dom.lease.breaks.BreakOptions;
+import org.estatio.dom.lease.breaks.BreakType;
 import org.estatio.dom.party.Party;
 import org.estatio.dom.utils.JodaPeriodUtils;
 import org.estatio.dom.valuetypes.LocalDateInterval;
@@ -219,7 +222,6 @@ public class Lease
      * {@link Property} of the first such {@link Occupancy occupancy}.
      */
 
-    @org.apache.isis.applib.annotation.Property(hidden = Where.PARENTED_TABLES)
     public Property getProperty() {
         if (getOccupancies().isEmpty()) {
             return null;
@@ -243,6 +245,7 @@ public class Lease
     public Lease change(
             final @ParameterLayout(named = "Name") String name,
             final @ParameterLayout(named = "Lease Type") @Parameter(optionality = Optionality.OPTIONAL) LeaseType leaseType) {
+
         setName(name);
         setLeaseType(leaseType);
         return this;
@@ -307,19 +310,11 @@ public class Lease
     @Action(domainEvent = ChangeDatesEvent.class)
     public Lease changeTenancyDates(
             final @ParameterLayout(named = "Start Date") LocalDate startDate,
-            final @ParameterLayout(named = "End Date") @Parameter(optionality = Optionality.OPTIONAL) LocalDate endDate
-            ) {
+            final @ParameterLayout(named = "End Date") @Parameter(optionality = Optionality.OPTIONAL) LocalDate endDate) {
         setTenancyStartDate(startDate);
         setTenancyEndDate(endDate);
-        verifyAllOccupancies();
 
         return this;
-    }
-
-    private void verifyAllOccupancies() {
-        for (Occupancy occupancy : occupancies) {
-            occupancy.verify();
-        }
     }
 
     public LocalDate default0ChangeTenancyDates() {
@@ -367,12 +362,16 @@ public class Lease
      * 
      * @param unit
      * @param startDate
+     * @param endDate
+     * 
      * @return
      */
     public Occupancy newOccupancy(
             final @ParameterLayout(named = "Unit") Unit unit,
-            final @ParameterLayout(named = "Start date") @Parameter(optionality = Optionality.OPTIONAL) LocalDate startDate) {
-        Occupancy occupancy = occupanciesRepo.newOccupancy(this, unit, startDate);
+
+            final @ParameterLayout(named = "Start date") @Parameter(optionality = Optionality.OPTIONAL) LocalDate startDate,
+            final @ParameterLayout(named = "End date") @Parameter(optionality = Optionality.OPTIONAL) LocalDate endDate) {
+        Occupancy occupancy = occupanciesRepo.newOccupancy(this, unit, startDate, endDate);
         occupancies.add(occupancy);
         return occupancy;
     }
@@ -455,10 +454,70 @@ public class Lease
 
     // //////////////////////////////////////
 
+    @org.apache.isis.applib.annotation.Property(hidden = Where.ALL_TABLES, editing = Editing.DISABLED, optionality = Optionality.OPTIONAL)
+    public Lease newBreakOption(
+            final @ParameterLayout(named = "Break date") LocalDate breakDate,
+            final @ParameterLayout(named = "Notification period", describedAs = "Notification period in a text format. Example 6y5m2d") String notificationPeriodStr,
+            final BreakExerciseType breakExerciseType,
+            final BreakType breakType,
+            final @ParameterLayout(named = "Description") @Parameter(optionality = Optionality.OPTIONAL) String description
+            ) {
+        final BreakOption breakOption = newTransientInstance(breakType.getFactoryClass());
+        breakOption.setType(breakType);
+        breakOption.setLease(this);
+        breakOption.setExerciseType(breakExerciseType);
+        final LocalDate date = breakDate;
+        breakOption.setBreakDate(date);
+        breakOption.setNotificationPeriod(notificationPeriodStr);
+        final Period notificationPeriodJoda = JodaPeriodUtils.asPeriod(notificationPeriodStr);
+        final LocalDate excersiseDate = date.minus(notificationPeriodJoda);
+        breakOption.setExerciseDate(excersiseDate);
+        persist(breakOption);
+        return this;
+    }
+
+    public LocalDate default0NewBreakOption() {
+        // REVIEW: this is just a guess as to a reasonable default
+        return getClockService().now().plusYears(2);
+    }
+
+    public String default1NewBreakOption() {
+        return "3m";
+    }
+
+    public BreakExerciseType default2NewBreakOption() {
+        return BreakExerciseType.TENANT;
+    }
+
+    public String validateNewBreakOption(
+            final LocalDate breakDate,
+            final String notificationPeriodStr,
+            final BreakExerciseType breakExerciseType,
+            final BreakType breakType,
+            final String description) {
+
+        final Period notificationPeriodJoda = JodaPeriodUtils.asPeriod(notificationPeriodStr);
+        if (notificationPeriodJoda == null) {
+            return "Notification period format not recognized";
+        }
+        final LocalDate notificationDate = breakDate.minus(notificationPeriodJoda);
+        return checkNewBreakOptionDuplicate(BreakType.FIXED, notificationDate);
+    }
+
+    private String checkNewBreakOptionDuplicate(final BreakType breakType, final LocalDate breakDate) {
+        final Iterable<BreakOption> duplicates =
+                Iterables.filter(getBreakOptions(),
+                        BreakOption.Predicates.whetherTypeAndBreakDate(breakType, breakDate));
+        return duplicates.iterator().hasNext() ?
+                "This lease already has a " + breakType + " break option for this date" : null;
+    }
+
+    // //////////////////////////////////////
+
     @javax.jdo.annotations.Column(name = "paidByBankMandateId")
     private BankMandate paidBy;
 
-    @org.apache.isis.applib.annotation.Property(hidden = Where.ALL_TABLES, editing = Editing.DISABLED, optionality = Optionality.OPTIONAL)
+    @org.apache.isis.applib.annotation.Property(hidden = Where.ALL_TABLES, optionality = Optionality.OPTIONAL)
     public BankMandate getPaidBy() {
         return paidBy;
     }
@@ -748,8 +807,8 @@ public class Lease
                 tenant);
 
         copyItemsAndTerms(newLease, tenancyStartDate);
-        copyOccupancies(newLease, tenancyStartDate);
         breakOptionsService.copyBreakOptions(this, newLease, tenancyStartDate);
+        copyOccupancies(newLease, tenancyStartDate, tenancyEndDate);
         copyAgreementRoleCommunicationChannels(newLease, tenancyStartDate);
         this.setNext(newLease);
         return newLease;
@@ -767,10 +826,10 @@ public class Lease
         }
     }
 
-    private void copyOccupancies(final Lease newLease, final LocalDate startDate) {
+    private void copyOccupancies(final Lease newLease, final LocalDate startDate, final LocalDate endDate) {
         for (Occupancy occupancy : getOccupancies()) {
             if (occupancy.getInterval().contains(startDate)) {
-                Occupancy newOccupancy = newLease.newOccupancy(occupancy.getUnit(), startDate);
+                Occupancy newOccupancy = newLease.newOccupancy(occupancy.getUnit(), startDate, null);
                 newOccupancy.setActivity(occupancy.getActivity());
                 newOccupancy.setBrand(occupancy.getBrand());
                 newOccupancy.setSector(occupancy.getSector());

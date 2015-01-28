@@ -31,7 +31,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.Period;
 
 import org.apache.isis.applib.annotation.Action;
-import org.apache.isis.applib.annotation.ActionLayout;
+import org.apache.isis.applib.annotation.CollectionLayout;
 import org.apache.isis.applib.annotation.DomainService;
 import org.apache.isis.applib.annotation.DomainServiceLayout;
 import org.apache.isis.applib.annotation.MemberOrder;
@@ -88,6 +88,7 @@ public class Leases extends EstatioDomainService<Lease> {
             final @Parameter(optionality = Optionality.OPTIONAL) @ParameterLayout(named = "End Date", describedAs = "Can be omitted when duration is filled in") LocalDate endDate,
             final @Parameter(optionality = Optionality.OPTIONAL) @ParameterLayout(named = "Landlord") Party landlord,
             final @Parameter(optionality = Optionality.OPTIONAL) @ParameterLayout(named = "Tentant") Party tenant
+
             // CHECKSTYLE:ON
             ) {
 
@@ -259,7 +260,7 @@ public class Leases extends EstatioDomainService<Lease> {
 
     // //////////////////////////////////////
 
-    @ActionLayout(hidden = Where.EVERYWHERE)
+    @CollectionLayout(hidden = Where.EVERYWHERE)
     public List<Lease> autoComplete(final String searchPhrase) {
         return searchPhrase.length() > 2
                 ? findLeases("*" + searchPhrase + "*", false)
@@ -316,7 +317,7 @@ public class Leases extends EstatioDomainService<Lease> {
     @Inject
     private AgreementRoleCommunicationChannelTypes agreementRoleCommunicationChannelTypes;
 
-    @Inject 
+    @Inject
     ClockService clockService;
 
 }
