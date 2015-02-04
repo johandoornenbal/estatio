@@ -26,15 +26,16 @@ import javax.jdo.annotations.InheritanceStrategy;
 
 import org.joda.time.LocalDate;
 
-import org.apache.isis.applib.annotation.AutoComplete;
-import org.apache.isis.applib.annotation.Bookmarkable;
-import org.apache.isis.applib.annotation.Hidden;
-import org.apache.isis.applib.annotation.Immutable;
-import org.apache.isis.applib.annotation.MultiLine;
-import org.apache.isis.applib.annotation.Named;
-import org.apache.isis.applib.annotation.NotPersisted;
-import org.apache.isis.applib.annotation.Optional;
+import org.apache.isis.applib.annotation.BookmarkPolicy;
+import org.apache.isis.applib.annotation.DomainObject;
+import org.apache.isis.applib.annotation.DomainObjectLayout;
+import org.apache.isis.applib.annotation.Editing;
+import org.apache.isis.applib.annotation.Optionality;
+import org.apache.isis.applib.annotation.Parameter;
+import org.apache.isis.applib.annotation.ParameterLayout;
 import org.apache.isis.applib.annotation.Programmatic;
+import org.apache.isis.applib.annotation.Property;
+import org.apache.isis.applib.annotation.PropertyLayout;
 import org.apache.isis.applib.annotation.Where;
 
 import org.estatio.dom.agreement.Agreement;
@@ -70,23 +71,20 @@ import org.estatio.dom.party.Party;
                         + "WHERE reference.matches(:referenceOrName)"
                         + "|| name.matches(:referenceOrName)")
 })
-@AutoComplete(repository = Guarantees.class, action = "autoComplete")
-@Bookmarkable
-@Immutable
+@DomainObject(editing = Editing.DISABLED, autoCompleteRepository = Guarantees.class, autoCompleteAction = "autoComplete")
+@DomainObjectLayout(bookmarking = BookmarkPolicy.AS_ROOT)
 public class Guarantee
         extends Agreement {
 
     @Override
-    @NotPersisted
-    @Hidden(where = Where.PARENTED_TABLES)
+    @Property(hidden = Where.PARENTED_TABLES, notPersisted = true)
     public Party getPrimaryParty() {
         final AgreementRole ar = getPrimaryAgreementRole();
         return partyOf(ar);
     }
 
     @Override
-    @NotPersisted
-    @Hidden(where = Where.PARENTED_TABLES)
+    @Property(hidden = Where.PARENTED_TABLES, notPersisted = true)
     public Party getSecondaryParty() {
         final AgreementRole ar = getSecondaryAgreementRole();
         return partyOf(ar);
@@ -106,8 +104,8 @@ public class Guarantee
 
     private Lease lease;
 
-    @Hidden(where = Where.REFERENCES_PARENT)
     @javax.jdo.annotations.Column(name = "leaseId", allowsNull = "false")
+    @Property(hidden = Where.REFERENCES_PARENT)
     public Lease getLease() {
         return lease;
     }
@@ -120,8 +118,8 @@ public class Guarantee
 
     private FinancialAccount financialAccount;
 
-    @Hidden
     @javax.jdo.annotations.Column(name = "financialAccountId", allowsNull = "true")
+    @Property(hidden = Where.EVERYWHERE)
     public FinancialAccount getFinancialAccount() {
         return financialAccount;
     }
@@ -147,8 +145,8 @@ public class Guarantee
 
     private String description;
 
-    @MultiLine(numberOfLines = 3)
     @javax.jdo.annotations.Column(allowsNull = "true")
+    @PropertyLayout(multiLine = 3)
     public String getDescription() {
         return description;
     }
@@ -161,7 +159,7 @@ public class Guarantee
 
     private LocalDate terminationDate;
 
-    @Optional
+    @Property(optionality = Optionality.OPTIONAL)
     public LocalDate getTerminationDate() {
         return terminationDate;
     }
@@ -175,7 +173,7 @@ public class Guarantee
     private String comments;
 
     @Column(allowsNull = "true")
-    @MultiLine(numberOfLines = 5)
+    @PropertyLayout(multiLine = 5)
     public String getComments() {
         return comments;
     }
@@ -187,8 +185,8 @@ public class Guarantee
     // //////////////////////////////////////
 
     public Guarantee terminate(
-            final @Named("Termination date") LocalDate terminationDate,
-            final @Named("Description") String description) {
+            final @ParameterLayout(named = "Termination date") LocalDate terminationDate,
+            final @ParameterLayout(named = "Description") String description) {
         setTerminationDate(terminationDate);
         BigDecimal balance = financialAccount.getBalance();
         if (balance.compareTo(BigDecimal.ZERO) != 0) {
@@ -211,7 +209,7 @@ public class Guarantee
     }
 
     public Guarantee changeContractualAmount(
-            final @Named("New contractual amount") BigDecimal newContractualAmount) {
+            final @ParameterLayout(named = "New contractual amount") BigDecimal newContractualAmount) {
         setContractualAmount(newContractualAmount);
         return this;
     }
@@ -221,9 +219,9 @@ public class Guarantee
     }
 
     public Guarantee change(
-            final @Named("Name") String name,
-            final @Named("Description") @Optional @MultiLine(numberOfLines = 3) String description,
-            final @Named("Comments") @MultiLine(numberOfLines = 3) String comments) {
+            final @ParameterLayout(named = "Name") String name,
+            final @ParameterLayout(named = "Description", multiLine = 3) @Parameter(optionality = Optionality.OPTIONAL) String description,
+            final @ParameterLayout(named = "Comments", multiLine = 3) String comments) {
         setName(name);
         setDescription(description);
         setComments(comments);
