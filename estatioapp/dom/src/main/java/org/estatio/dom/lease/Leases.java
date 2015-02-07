@@ -85,10 +85,10 @@ public class Leases extends UdoDomainRepositoryAndFactory<Lease> {
             final @ParameterLayout(named = "Name") String name,
             final @ParameterLayout(named = "Type") LeaseType leaseType,
             final @ParameterLayout(named = "Start Date") LocalDate startDate,
-            final @Parameter(optional = Optionality.TRUE) @ParameterLayout(named = "Duration", describedAs = "Duration in a text format. Example 6y5m2d") String duration,
-            final @Parameter(optional = Optionality.TRUE) @ParameterLayout(named = "End Date", describedAs = "Can be omitted when duration is filled in") LocalDate endDate,
-            final @Parameter(optional = Optionality.TRUE) @ParameterLayout(named = "Landlord") Party landlord,
-            final @Parameter(optional = Optionality.TRUE) @ParameterLayout(named = "Tenant") Party tenant,
+            final @Parameter(optionality = Optionality.OPTIONAL) @ParameterLayout(named = "Duration", describedAs = "Duration in a text format. Example 6y5m2d") String duration,
+            final @Parameter(optionality = Optionality.OPTIONAL) @ParameterLayout(named = "End Date", describedAs = "Can be omitted when duration is filled in") LocalDate endDate,
+            final @Parameter(optionality = Optionality.OPTIONAL) @ParameterLayout(named = "Landlord") Party landlord,
+            final @Parameter(optionality = Optionality.OPTIONAL) @ParameterLayout(named = "Tenant") Party tenant,
             final ApplicationTenancy applicationTenancy
             // CHECKSTYLE:ON
     ) {

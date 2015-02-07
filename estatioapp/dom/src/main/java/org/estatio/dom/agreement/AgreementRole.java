@@ -52,7 +52,6 @@ import org.apache.isis.applib.annotation.Where;
 import org.estatio.dom.EstatioDomainObject;
 import org.estatio.dom.JdoColumnLength;
 import org.estatio.dom.WithIntervalContiguous;
-import org.estatio.dom.apptenancy.WithApplicationTenancyCountry;
 import org.estatio.dom.apptenancy.WithApplicationTenancyProperty;
 import org.estatio.dom.communicationchannel.CommunicationChannel;
 import org.estatio.dom.communicationchannel.CommunicationChannelContributions;
@@ -204,7 +203,7 @@ public class AgreementRole
     @javax.jdo.annotations.Persistent
     private LocalDate startDate;
 
-    @Property(optional = Optionality.TRUE, editing = Editing.DISABLED)
+    @Property(optionality = Optionality.OPTIONAL, editing = Editing.DISABLED)
     @Override
     public LocalDate getStartDate() {
         return startDate;
@@ -218,7 +217,7 @@ public class AgreementRole
     @javax.jdo.annotations.Persistent
     private LocalDate endDate;
 
-    @Property(optional = Optionality.TRUE, editing = Editing.DISABLED)
+    @Property(optionality = Optionality.OPTIONAL, editing = Editing.DISABLED)
     public LocalDate getEndDate() {
         return endDate;
     }
@@ -230,8 +229,8 @@ public class AgreementRole
     @Action(semantics = SemanticsOf.IDEMPOTENT)
     @Override
     public AgreementRole changeDates(
-            final @Parameter(optional = Optionality.TRUE) @ParameterLayout(named = "Start Date") LocalDate startDate,
-            final @Parameter(optional = Optionality.TRUE) @ParameterLayout(named = "End Date") LocalDate endDate) {
+            final @Parameter(optionality = Optionality.OPTIONAL) @ParameterLayout(named = "Start Date") LocalDate startDate,
+            final @Parameter(optionality = Optionality.OPTIONAL) @ParameterLayout(named = "End Date") LocalDate endDate) {
         helper.changeDates(startDate, endDate);
         return this;
     }
@@ -284,13 +283,13 @@ public class AgreementRole
 
     // //////////////////////////////////////
 
-    @Property(optional = Optionality.TRUE, editing = Editing.DISABLED, hidden = Where.ALL_TABLES)
+    @Property(optionality = Optionality.OPTIONAL, editing = Editing.DISABLED, hidden = Where.ALL_TABLES)
     @Override
     public AgreementRole getPredecessor() {
         return helper.getPredecessor(getAgreement().getRoles(), getType().matchingRole());
     }
 
-    @Property(optional = Optionality.TRUE, editing = Editing.DISABLED, hidden = Where.ALL_TABLES)
+    @Property(optionality = Optionality.OPTIONAL, editing = Editing.DISABLED, hidden = Where.ALL_TABLES)
     @Override
     public AgreementRole getSuccessor() {
         return helper.getSuccessor(getAgreement().getRoles(), getType().matchingRole());
@@ -322,7 +321,7 @@ public class AgreementRole
     public AgreementRole succeededBy(
             final Party party,
             final @ParameterLayout(named = "Start date") LocalDate startDate,
-            final @Parameter(optional = Optionality.TRUE) @ParameterLayout(named = "End date") LocalDate endDate) {
+            final @Parameter(optionality = Optionality.OPTIONAL) @ParameterLayout(named = "End date") LocalDate endDate) {
         return helper.succeededBy(startDate, endDate, new SiblingFactory(this, party));
     }
 
@@ -351,7 +350,7 @@ public class AgreementRole
 
     public AgreementRole precededBy(
             final Party party,
-            final @Parameter(optional = Optionality.TRUE) @ParameterLayout(named = "Start date") LocalDate startDate,
+            final @Parameter(optionality = Optionality.OPTIONAL) @ParameterLayout(named = "Start date") LocalDate startDate,
             final @ParameterLayout(named = "End date") LocalDate endDate) {
 
         return helper.precededBy(startDate, endDate, new SiblingFactory(this, party));
@@ -401,8 +400,8 @@ public class AgreementRole
     public AgreementRole addCommunicationChannel(
             final @ParameterLayout(named = "Type") AgreementRoleCommunicationChannelType type,
             final CommunicationChannel communicationChannel,
-            final @Parameter(optional = Optionality.TRUE) @ParameterLayout(named = "Start date") LocalDate startDate,
-            final @Parameter(optional = Optionality.TRUE) @ParameterLayout(named = "End date") LocalDate endDate) {
+            final @Parameter(optionality = Optionality.OPTIONAL) @ParameterLayout(named = "Start date") LocalDate startDate,
+            final @Parameter(optionality = Optionality.OPTIONAL) @ParameterLayout(named = "End date") LocalDate endDate) {
         createAgreementRoleCommunicationChannel(type, communicationChannel, startDate, endDate);
         return this;
     }
