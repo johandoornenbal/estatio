@@ -43,16 +43,21 @@ import org.apache.isis.applib.annotation.CollectionLayout;
 import org.apache.isis.applib.annotation.DomainObject;
 import org.apache.isis.applib.annotation.DomainObjectLayout;
 import org.apache.isis.applib.annotation.Editing;
+import org.apache.isis.applib.annotation.Hidden;
 import org.apache.isis.applib.annotation.InvokeOn;
+import org.apache.isis.applib.annotation.Named;
 import org.apache.isis.applib.annotation.Optionality;
 import org.apache.isis.applib.annotation.Parameter;
 import org.apache.isis.applib.annotation.ParameterLayout;
 import org.apache.isis.applib.annotation.Programmatic;
+import org.apache.isis.applib.annotation.PropertyLayout;
 import org.apache.isis.applib.annotation.RenderType;
 import org.apache.isis.applib.annotation.RestrictTo;
 import org.apache.isis.applib.annotation.SemanticsOf;
 import org.apache.isis.applib.annotation.Where;
 import org.apache.isis.applib.services.eventbus.ActionDomainEvent;
+
+import org.isisaddons.module.security.dom.tenancy.ApplicationTenancy;
 
 import org.estatio.dom.EstatioUserRoles;
 import org.estatio.dom.JdoColumnLength;
@@ -63,6 +68,9 @@ import org.estatio.dom.agreement.AgreementRoleCommunicationChannel;
 import org.estatio.dom.agreement.AgreementRoleCommunicationChannelTypes;
 import org.estatio.dom.agreement.AgreementRoleType;
 import org.estatio.dom.agreement.AgreementType;
+import org.estatio.dom.apptenancy.EstatioApplicationTenancies;
+import org.estatio.dom.apptenancy.WithApplicationTenancyPathPersisted;
+import org.estatio.dom.apptenancy.WithApplicationTenancyProperty;
 import org.estatio.dom.asset.Property;
 import org.estatio.dom.asset.Unit;
 import org.estatio.dom.bankmandate.BankMandate;
@@ -135,12 +143,44 @@ import org.estatio.dom.valuetypes.LocalDateInterval;
 @DomainObject(autoCompleteRepository = Leases.class, autoCompleteAction = "autoComplete")
 @DomainObjectLayout(bookmarking = BookmarkPolicy.AS_ROOT)
 public class Lease
-        extends Agreement {
+        extends Agreement
+        implements WithApplicationTenancyProperty, WithApplicationTenancyPathPersisted {
+
+    public Lease() {
+        super(LeaseConstants.ART_LANDLORD, LeaseConstants.ART_TENANT);
+    }
 
     // //////////////////////////////////////
 
     public void created() {
         setStatus(LeaseStatus.ACTIVE);
+    }
+
+
+    // //////////////////////////////////////
+
+    private String applicationTenancyPath;
+
+    @javax.jdo.annotations.Column(
+            length = ApplicationTenancy.MAX_LENGTH_PATH,
+            allowsNull = "false",
+            name = "atPath"
+    )
+    @Hidden
+    public String getApplicationTenancyPath() {
+        return applicationTenancyPath;
+    }
+
+    public void setApplicationTenancyPath(final String applicationTenancyPath) {
+        this.applicationTenancyPath = applicationTenancyPath;
+    }
+
+    @PropertyLayout(
+            named = "Application Level",
+            describedAs = "Determines those users for whom this object is available to view and/or modify."
+    )
+    public ApplicationTenancy getApplicationTenancy() {
+        return applicationTenancies.findTenancyByPath(getApplicationTenancyPath());
     }
 
     // //////////////////////////////////////
@@ -167,7 +207,7 @@ public class Lease
 
     @Programmatic
     public LeaseStatus getEffectiveStatus() {
-        ArrayList<LeaseItem> all = new ArrayList<LeaseItem>(getItems());
+        List<LeaseItem> all = Lists.newArrayList(getItems());
         int itemCount = getItems().size();
         List<LeaseItemStatus> statusList = Lists.transform(all, LeaseItem.Functions.GET_STATUS);
         int suspensionCount = Collections.frequency(statusList, LeaseItemStatus.SUSPENDED);
@@ -401,14 +441,37 @@ public class Lease
             final Charge charge,
             final InvoicingFrequency invoicingFrequency,
             final PaymentMethod paymentMethod,
-            final @ParameterLayout(named = "Start date") LocalDate startDate) {
-        LeaseItem leaseItem = leaseItems.newLeaseItem(this, type, charge, invoicingFrequency, paymentMethod, startDate);
+            final @ParameterLayout(named="Start date") LocalDate startDate,
+            final ApplicationTenancy applicationTenancy) {
+        LeaseItem leaseItem = leaseItems.newLeaseItem(this, type, charge, invoicingFrequency, paymentMethod, startDate, applicationTenancy);
         return leaseItem;
     }
 
-    public LocalDate default4NewItem() {
-        return getStartDate();
+    public List<Charge> choices1NewItem() {
+        return leaseItems.choices2NewLeaseItem(this);
     }
+
+    public LocalDate default4NewItem() {
+        return leaseItems.default5NewLeaseItem(this);
+    }
+
+    public List<ApplicationTenancy> choices5NewItem() {
+        return leaseItems.choices6NewLeaseItem(this);
+    }
+
+    public ApplicationTenancy default5NewItem() {
+        return leaseItems.default6NewLeaseItem(this);
+    }
+
+    public String validateNewItem(final LeaseItemType type,
+                                   final Charge charge,
+                                   final InvoicingFrequency invoicingFrequency,
+                                   final PaymentMethod paymentMethod,
+                                   final @Named("Start date") LocalDate startDate,
+                                   final ApplicationTenancy applicationTenancy) {
+        return leaseItems.validateNewLeaseItem(this, type, charge, invoicingFrequency, paymentMethod, startDate, applicationTenancy);
+    }
+
 
     @Action(hidden = Where.EVERYWHERE)
     public LeaseItem findItem(
@@ -526,7 +589,10 @@ public class Lease
         final Party debtor = getSecondaryParty();
 
         final BankMandate bankMandate =
-                bankMandates.newBankMandate(reference, reference, startDate, endDate, debtor, creditor, bankAccount);
+                bankMandates.newBankMandate(
+                        reference, reference,
+                        startDate, endDate,
+                        debtor, creditor, bankAccount);
         paidBy(bankMandate);
         return this;
     }
@@ -737,6 +803,7 @@ public class Lease
             final LocalDate tenancyStartDate,
             final LocalDate tenancyEndDate) {
         Lease newLease = leases.newLease(
+                this.getApplicationTenancy(),
                 reference,
                 name,
                 this.getLeaseType(),
@@ -744,8 +811,7 @@ public class Lease
                 endDate,
                 tenancyStartDate,
                 tenancyEndDate,
-                this.getPrimaryParty(),
-                tenant);
+                this.getPrimaryParty(), tenant);
 
         copyItemsAndTerms(newLease, tenancyStartDate);
         copyOccupancies(newLease, tenancyStartDate);
@@ -762,7 +828,8 @@ public class Lease
                     item.getCharge(),
                     item.getInvoicingFrequency(),
                     item.getPaymentMethod(),
-                    item.getStartDate());
+                    item.getStartDate(),
+                    item.getApplicationTenancy());
             item.copyTerms(startDate, newItem);
         }
     }
@@ -928,6 +995,9 @@ public class Lease
     @Inject
     CommunicationChannels communicationChannels;
 
+    @Inject
+    EstatioApplicationTenancies estatioApplicationTenancies;
+	
     @Inject
     BreakOptions breakOptionsService;
 

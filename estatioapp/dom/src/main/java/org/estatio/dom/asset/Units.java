@@ -33,8 +33,8 @@ import org.apache.isis.applib.annotation.SemanticsOf;
 import org.apache.isis.applib.annotation.Where;
 import org.apache.isis.applib.services.clock.ClockService;
 
-import org.estatio.dom.EstatioDomainService;
 import org.estatio.dom.RegexValidation;
+import org.estatio.dom.UdoDomainRepositoryAndFactory;
 import org.estatio.dom.utils.StringUtils;
 
 @DomainService(repositoryFor = Unit.class)
@@ -42,7 +42,7 @@ import org.estatio.dom.utils.StringUtils;
         named = "Fixed Assets",
         menuBar = DomainServiceLayout.MenuBar.PRIMARY,
         menuOrder = "10.2")
-public class Units extends EstatioDomainService<Unit> {
+public class Units extends UdoDomainRepositoryAndFactory<Unit> {
 
     @Inject
     ClockService clockService;
