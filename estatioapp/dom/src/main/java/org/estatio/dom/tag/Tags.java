@@ -27,11 +27,15 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.isis.applib.annotation.DomainService;
+import org.apache.isis.applib.annotation.NatureOfService;
 import org.apache.isis.applib.annotation.Programmatic;
 import org.apache.isis.applib.services.bookmark.Bookmark;
 import org.estatio.dom.EstatioDomainService;
 
-@DomainService(menuOrder = "80", repositoryFor = Tag.class)
+@DomainService(
+        nature = NatureOfService.DOMAIN,
+        repositoryFor = Tag.class
+)
 public class Tags extends EstatioDomainService<Tag> {
 
     public Tags() {
