@@ -35,7 +35,7 @@ public class IndicesTest extends EstatioIntegrationTest {
 
         @Before
         public void setupData() {
-            runScript(new EstatioBaseLineFixture());
+            runFixtureScript(new EstatioBaseLineFixture());
         }
 
         @Inject

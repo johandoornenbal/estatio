@@ -58,8 +58,11 @@ public class EstatioOperationalTeardownFixture extends FixtureScript {
         
         deleteFrom("Agreement");
         
+        deleteFrom("CommunicationChannelOwnerLinkForFixedAsset");
+        deleteFrom("CommunicationChannelOwnerLinkForParty");
+        deleteFrom("CommunicationChannelOwnerLink");
         deleteFrom("CommunicationChannel");
-        
+
         deleteFrom("Unit");
         deleteFrom("Property");
         deleteFrom("FixedAssetRole");

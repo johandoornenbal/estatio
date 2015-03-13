@@ -100,7 +100,7 @@ public class LeaseTermTest extends EstatioIntegrationTest {
 
             @Before
             public void setupData() {
-                runScript(new FixtureScript() {
+                runFixtureScript(new FixtureScript() {
                     @Override
                     protected void execute(ExecutionContext executionContext) {
                         executionContext.executeChild(this, new EstatioBaseLineFixture());
@@ -150,7 +150,7 @@ public class LeaseTermTest extends EstatioIntegrationTest {
 
                             @Override
                             public void run() {
-                                runScript(new InvoiceForLeaseItemTypeOfDiscountOneQuarterForOxfMiracle005());
+                                runFixtureScript(new InvoiceForLeaseItemTypeOfDiscountOneQuarterForOxfMiracle005());
                             }
                         }
                         );
@@ -269,7 +269,7 @@ public class LeaseTermTest extends EstatioIntegrationTest {
 
         @Before
         public void setupData() {
-            runScript(new FixtureScript() {
+            runFixtureScript(new FixtureScript() {
                 @Override
                 protected void execute(ExecutionContext executionContext) {
                     executionContext.executeChild(this, new EstatioBaseLineFixture());
@@ -316,7 +316,7 @@ public class LeaseTermTest extends EstatioIntegrationTest {
 
         @Before
         public void setupData() {
-            runScript(new FixtureScript() {
+            runFixtureScript(new FixtureScript() {
                 @Override
                 protected void execute(ExecutionContext executionContext) {
                     executionContext.executeChild(this, new EstatioBaseLineFixture());

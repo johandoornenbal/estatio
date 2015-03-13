@@ -19,9 +19,11 @@
 package org.estatio.dom.communicationchannel;
 
 import java.util.List;
+import java.util.Objects;
 
 import javax.jdo.annotations.InheritanceStrategy;
 
+import com.google.common.base.Predicate;
 import org.apache.isis.applib.annotation.Disabled;
 import org.apache.isis.applib.annotation.Immutable;
 import org.apache.isis.applib.annotation.Mandatory;
@@ -40,18 +42,7 @@ import org.estatio.dom.geography.States;
 @javax.jdo.annotations.Indices({
         @javax.jdo.annotations.Index(
                 name = "PostalAddress_main_idx",
-                members = { "owner", "address1", "postalCode", "city", "country" })
-})
-@javax.jdo.annotations.Queries({
-        @javax.jdo.annotations.Query(
-                name = "findByAddress", language = "JDOQL",
-                value = "SELECT "
-                        + "FROM org.estatio.dom.communicationchannel.CommunicationChannel "
-                        + "WHERE owner == :owner"
-                        + "&& address1 == :address1 "
-                        + "&& postalCode == :postalCode "
-                        + "&& city == :city "
-                        + "&& country == :country ")
+                members = { "address1", "postalCode", "city", "country" })
 })
 @Immutable
 public class PostalAddress extends CommunicationChannel {
@@ -246,4 +237,27 @@ public class PostalAddress extends CommunicationChannel {
     public String default4ChangePostalAddress() {
         return getPostalCode();
     }
+
+    // //////////////////////////////////////
+
+    public static class Predicates {
+        private Predicates(){}
+
+        public static Predicate<PostalAddress> equalTo(
+                final String address1,
+                final String postalCode,
+                final String city,
+                final Country country) {
+            return new Predicate<PostalAddress>() {
+                @Override
+                public boolean apply(final PostalAddress input) {
+                    return Objects.equals(address1, input.getAddress1()) &&
+                            Objects.equals(postalCode, input.getPostalCode()) &&
+                            Objects.equals(city, input.getCity()) &&
+                            Objects.equals(country, input.getCountry());
+                }
+            };
+        }
+    }
+
 }

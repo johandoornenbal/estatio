@@ -21,6 +21,7 @@ package org.estatio.dom.communicationchannel;
 import org.junit.Test;
 
 import org.estatio.dom.AbstractBeanPropertiesTest;
+import org.estatio.dom.PojoTester;
 
 public class FaxNumberTest {
 
@@ -30,7 +31,7 @@ public class FaxNumberTest {
         public void test() {
             newPojoTester()
                     .withFixture(pojos(CommunicationChannelOwner.class, CommunicationChannelOwnerForTesting.class))
-                    .exercise(new PhoneOrFaxNumber());
+                    .exercise(new PhoneOrFaxNumber(), PojoTester.FilterSet.excluding("owner"));
         }
 
     }

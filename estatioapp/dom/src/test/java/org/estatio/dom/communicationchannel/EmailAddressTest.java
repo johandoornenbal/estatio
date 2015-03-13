@@ -21,6 +21,7 @@ package org.estatio.dom.communicationchannel;
 import org.junit.Test;
 
 import org.estatio.dom.AbstractBeanPropertiesTest;
+import org.estatio.dom.PojoTester;
 
 public class EmailAddressTest {
 
@@ -30,7 +31,7 @@ public class EmailAddressTest {
         public void test() {
             newPojoTester()
                     .withFixture(pojos(CommunicationChannelOwner.class, CommunicationChannelOwnerForTesting.class))
-                    .exercise(new EmailAddress());
+                    .exercise(new EmailAddress(), PojoTester.FilterSet.excluding("owner"));
         }
 
 

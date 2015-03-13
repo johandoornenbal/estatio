@@ -18,15 +18,14 @@
  */
 package org.estatio.dom.communicationchannel;
 
+import java.util.Objects;
 import javax.jdo.annotations.InheritanceStrategy;
-
+import com.google.common.base.Predicate;
 import org.apache.isis.applib.annotation.Immutable;
 import org.apache.isis.applib.annotation.Mandatory;
 import org.apache.isis.applib.annotation.Named;
-import org.apache.isis.applib.annotation.Optional;
 import org.apache.isis.applib.annotation.RegEx;
 import org.apache.isis.applib.annotation.Title;
-
 import org.estatio.dom.JdoColumnLength;
 import org.estatio.dom.RegexValidation;
 
@@ -36,14 +35,6 @@ import org.estatio.dom.RegexValidation;
 @javax.jdo.annotations.Indices({
     @javax.jdo.annotations.Index(
             name="PhoneNumber_phoneNumber_IDX", members={"phoneNumber"})
-})
-@javax.jdo.annotations.Queries({
-    @javax.jdo.annotations.Query(
-            name = "findByPhoneNumber", language = "JDOQL", 
-            value = "SELECT "
-                    + "FROM org.estatio.dom.communicationchannel.PhoneOrFaxNumber " 
-                    + "WHERE owner == :owner "
-                    + "&& phoneNumber == :phoneNumber")
 })
 @Immutable
 public class PhoneOrFaxNumber extends CommunicationChannel {
@@ -73,5 +64,24 @@ public class PhoneOrFaxNumber extends CommunicationChannel {
     public String default0ChangePhoneOrFaxNumber() {
         return getPhoneNumber();
     }
+
+    // //////////////////////////////////////
+
+    public static class Predicates {
+        private Predicates(){}
+
+        public static Predicate<PhoneOrFaxNumber> equalTo(
+                final String phoneNumber,
+                final CommunicationChannelType communicationChannelType) {
+            return new Predicate<PhoneOrFaxNumber>() {
+                @Override
+                public boolean apply(final PhoneOrFaxNumber input) {
+                    return  Objects.equals(phoneNumber, input.getPhoneNumber()) &&
+                            Objects.equals(communicationChannelType, input.getType());
+                }
+            };
+        }
+    }
+
 
 }

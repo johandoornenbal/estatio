@@ -55,6 +55,11 @@ language governing permissions and limitations under the License.
             <artifactId>isis-core-metamodel</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.javafaker</groupId>
+            <artifactId>javafaker</artifactId>
+        </dependency>
+
         <!-- GMAP3 -->
         <dependency>
             <groupId>org.isisaddons.wicket.gmap3</groupId>

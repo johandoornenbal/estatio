@@ -18,6 +18,7 @@
  */
 package org.estatio.fixture;
 
+import com.github.javafaker.Faker;
 import org.apache.isis.applib.fixturescripts.FixtureScript;
 
 public abstract class EstatioFixtureScript extends FixtureScript {
@@ -32,6 +33,11 @@ public abstract class EstatioFixtureScript extends FixtureScript {
     protected EstatioFixtureScript(String friendlyName, String localName, Discoverability discoverability) {
         super(friendlyName, localName, discoverability);
     }
+
+    // //////////////////////////////////////
+
+    protected final Faker faker = new Faker();
+    protected final Faker2 faker2 = new Faker2();
 
     // //////////////////////////////////////
 

@@ -19,16 +19,13 @@
 package org.estatio.dom.communicationchannel;
 
 import java.util.SortedSet;
-
 import javax.inject.Inject;
 import javax.jdo.annotations.Column;
 import javax.jdo.annotations.DiscriminatorStrategy;
-import javax.jdo.annotations.Extension;
 import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.InheritanceStrategy;
 import javax.jdo.annotations.VersionStrategy;
-
 import org.apache.isis.applib.Identifier;
 import org.apache.isis.applib.annotation.ActionInteraction;
 import org.apache.isis.applib.annotation.BookmarkPolicy;
@@ -39,11 +36,11 @@ import org.apache.isis.applib.annotation.Immutable;
 import org.apache.isis.applib.annotation.MemberOrder;
 import org.apache.isis.applib.annotation.MultiLine;
 import org.apache.isis.applib.annotation.Named;
+import org.apache.isis.applib.annotation.NotPersisted;
 import org.apache.isis.applib.annotation.Optional;
 import org.apache.isis.applib.annotation.Programmatic;
 import org.apache.isis.applib.annotation.Where;
 import org.apache.isis.applib.services.eventbus.ActionInteractionEvent;
-
 import org.estatio.dom.EstatioDomainObject;
 import org.estatio.dom.JdoColumnLength;
 import org.estatio.dom.WithNameGetter;
@@ -74,23 +71,7 @@ import org.estatio.dom.WithReferenceGetter;
                 value = "SELECT "
                         + "FROM org.estatio.dom.communicationchannel.CommunicationChannel "
                         + "WHERE reference == :reference "
-                        + "&& type == :type"),
-        @javax.jdo.annotations.Query(
-                name = "findByOwner", language = "JDOQL",
-                value = "SELECT "
-                        + "FROM org.estatio.dom.communicationchannel.CommunicationChannel "
-                        + "WHERE owner == :owner "),
-        @javax.jdo.annotations.Query(
-                name = "findByOwnerAndType", language = "JDOQL",
-                value = "SELECT "
-                        + "FROM org.estatio.dom.communicationchannel.CommunicationChannel "
-                        + "WHERE owner == :owner && type == :type"),
-        @javax.jdo.annotations.Query(
-                name = "findOtherByOwnerAndType", language = "JDOQL",
-                value = "SELECT "
-                        + "FROM org.estatio.dom.communicationchannel.CommunicationChannel "
-                        + "WHERE owner == :owner && type == :type && this != :exclude")
-
+                        + "&& type == :type")
 })
 @Bookmarkable(BookmarkPolicy.AS_CHILD)
 @Immutable
@@ -116,37 +97,22 @@ public abstract class CommunicationChannel
 
     // //////////////////////////////////////
 
-    private CommunicationChannelOwner owner;
-
-    /**
-     * nb: annotated as <tt>@Optional</tt>, but this is a workaround because
-     * cannot set <tt>@Column(allowNulls="false")</tt> for a polymorphic
-     * relationship.
-     */
-    @javax.jdo.annotations.Persistent(
-            extensions = {
-                    @Extension(vendorName = "datanucleus",
-                            key = "mapping-strategy",
-                            value = "per-implementation"),
-                    @Extension(vendorName = "datanucleus",
-                            key = "implementation-classes",
-                            value = "org.estatio.dom.party.Party"
-                                    + ",org.estatio.dom.asset.FixedAsset")
-            })
-    @javax.jdo.annotations.Columns({
-            @javax.jdo.annotations.Column(name = "ownerPartyId"),
-            @javax.jdo.annotations.Column(name = "ownerFixedAssetId")
-    })
+    @NotPersisted
     @Optional
     @Hidden(where = Where.PARENTED_TABLES)
     @Disabled
     public CommunicationChannelOwner getOwner() {
-        return owner;
+        final CommunicationChannelOwnerLink link = communicationChannelOwnerLinks.findByCommunicationChannel(this);
+        return link != null? link.getPolymorphicReference(): null;
     }
 
+    @Programmatic
     public void setOwner(final CommunicationChannelOwner owner) {
-        this.owner = owner;
+        final CommunicationChannelOwnerLink link = communicationChannelOwnerLinks.createLink(this, owner);
+
     }
+
+
 
     // //////////////////////////////////////
 
@@ -265,6 +231,10 @@ public abstract class CommunicationChannel
 
     @ActionInteraction(CommunicationChannel.RemoveEvent.class)
     public void remove(@Named("Replace with") @Optional CommunicationChannel replacement) {
+        final CommunicationChannelOwnerLink ownerLink = communicationChannelOwnerLinks.findByCommunicationChannel(this);
+        if(ownerLink != null) {
+            getContainer().remove(ownerLink);
+        }
         getContainer().remove(this);
     }
 
@@ -274,5 +244,7 @@ public abstract class CommunicationChannel
 
     @Inject
     CommunicationChannels communicationChannels;
+    @Inject
+    CommunicationChannelOwnerLinks communicationChannelOwnerLinks;
 
 }
