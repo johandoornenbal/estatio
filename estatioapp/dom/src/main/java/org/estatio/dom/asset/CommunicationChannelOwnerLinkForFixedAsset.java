@@ -62,7 +62,7 @@ public class CommunicationChannelOwnerLinkForFixedAsset extends CommunicationCha
 
     @Column(
             allowsNull = "false",
-            name = "fixedAsset_id"
+            name = "fixedAssetId"
     )
     @MemberOrder(sequence = "1")
     public FixedAsset getFixedAsset() {

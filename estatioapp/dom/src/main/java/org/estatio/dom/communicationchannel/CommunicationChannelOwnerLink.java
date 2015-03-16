@@ -123,7 +123,7 @@ public abstract class CommunicationChannelOwnerLink extends PolymorphicAssociati
     private CommunicationChannel communicationChannel;
     @Column(
             allowsNull = "false",
-            name = "communicationChannel_id"
+            name = "communicationChannelId"
     )
     public CommunicationChannel getCommunicationChannel() {
         return communicationChannel;

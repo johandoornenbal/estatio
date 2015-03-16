@@ -61,7 +61,7 @@ public class CommunicationChannelOwnerLinkForParty extends CommunicationChannelO
 
     @Column(
             allowsNull = "false",
-            name = "party_id"
+            name = "partyId"
     )
     @MemberOrder(sequence = "1")
     public Party getParty() {
