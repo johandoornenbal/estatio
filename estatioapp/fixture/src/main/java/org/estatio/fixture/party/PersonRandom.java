@@ -78,8 +78,8 @@ public class PersonRandom extends PersonAbstract {
     protected void execute(ExecutionContext executionContext) {
 
         defaultParam("reference", executionContext, faker.lorem().fixedString(6));
-        defaultParam("firstName", executionContext, faker.lorem().fixedString(6));
-        defaultParam("lastName", executionContext, faker.lorem().fixedString(6));
+        defaultParam("firstName", executionContext, faker.name().firstName());
+        defaultParam("lastName", executionContext, faker.name().fullName());
         defaultParam("personGenderType", executionContext, faker2.values().anEnum(PersonGenderType.class));
 
         final String initials = getFirstName().substring(0,1);

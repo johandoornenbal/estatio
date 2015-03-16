@@ -98,7 +98,7 @@ public class CommunicationChannelContributionsIntegTest extends EstatioIntegrati
             Assertions.assertThat(before).isEmpty();
 
             // when
-            final String emailAddress = faker.internet().emailAddress();
+            final String emailAddress = "bar@foo.com";
             wrap(communicationChannelContributions).newEmail(party, CommunicationChannelType.EMAIL_ADDRESS, emailAddress);
 
             // then
