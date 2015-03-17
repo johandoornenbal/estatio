@@ -1,3 +1,21 @@
+/*
+ *
+ *  Copyright 2012-2015 Eurocommercial Properties NV
+ *
+ *
+ *  Licensed under the Apache License, Version 2.0 (the
+ *  "License"); you may not use this file except in compliance
+ *  with the License.  You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ */
 package org.estatio.dom.project;
 
 import javax.jdo.annotations.Column;
@@ -11,10 +29,15 @@ import javax.jdo.annotations.Query;
 import javax.jdo.annotations.Version;
 import javax.jdo.annotations.VersionStrategy;
 
-import org.apache.isis.applib.annotation.Named;
+import org.apache.isis.applib.annotation.DomainObject;
+import org.apache.isis.applib.annotation.Editing;
+import org.apache.isis.applib.annotation.ParameterLayout;
+import org.apache.isis.applib.annotation.Property;
+import org.apache.isis.applib.annotation.PropertyLayout;
 import org.apache.isis.applib.annotation.Title;
 import org.estatio.dom.EstatioDomainObject;
-import org.estatio.dom.asset.Property;
+import org.estatio.dom.RegexValidation;
+import org.estatio.dom.WithReferenceUnique;
 import org.estatio.dom.party.Party;
 import org.joda.time.LocalDate;
 
@@ -31,19 +54,17 @@ import org.joda.time.LocalDate;
                 name = "findByReferenceOrName", language = "JDOQL",
                 value = "SELECT " +
                         "FROM org.estatio.dom.project.Project " +
-                        "WHERE reference.matches(matcher) || name.matches(matcher) "),
+                        "WHERE reference.matches(:matcher) || name.matches(:matcher) "),
         @Query(
                 name = "findByResponsible", language = "JDOQL",
                 value = "SELECT " +
                         "FROM org.estatio.dom.project.Project " +
-                        "WHERE responsible == :responsible "),
-        @Query(
-                name = "findByProperty", language = "JDOQL",
-                value = "SELECT " +
-                        "FROM org.estatio.dom.project.Project " +
-                        "WHERE property == :property ")
+                        "WHERE responsible == :responsible ")
 })
-public class Project extends EstatioDomainObject<Project> {
+@DomainObject(editing=Editing.DISABLED, autoCompleteRepository=Projects.class, autoCompleteAction = "autoComplete")
+public class Project 
+		extends EstatioDomainObject<Project>
+		implements WithReferenceUnique {
 
     public Project() {
         super("reference,startDate");
@@ -54,6 +75,8 @@ public class Project extends EstatioDomainObject<Project> {
     private String reference;
 
     @Column(allowsNull = "false")
+    @Property(regexPattern = RegexValidation.REFERENCE)
+    @PropertyLayout(describedAs = "Unique reference code for this project")
     public String getReference() {
         return reference;
     }
@@ -105,20 +128,6 @@ public class Project extends EstatioDomainObject<Project> {
 
     // //////////////////////////////////////
 
-    private Property property;
-
-    @Column(allowsNull = "true")
-    @Persistent
-    public Property getProperty() {
-        return property;
-    }
-
-    public void setProperty(Property property) {
-        this.property = property;
-    }
-
-    // //////////////////////////////////////
-
     private Party responsible;
 
     @Column(allowsNull = "false")
@@ -132,7 +141,7 @@ public class Project extends EstatioDomainObject<Project> {
 
     // //////////////////////////////////////
 
-    public Project postponeOneWeek(@Named("Reason") String reason) {
+    public Project postponeOneWeek(@ParameterLayout(named="Reason") String reason) {
         setStartDate(getStartDate().plusWeeks(1));
         return this;
     }

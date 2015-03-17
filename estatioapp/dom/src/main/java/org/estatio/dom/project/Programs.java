@@ -33,57 +33,52 @@ import org.apache.isis.applib.annotation.Parameter;
 import org.apache.isis.applib.annotation.ParameterLayout;
 import org.apache.isis.applib.annotation.SemanticsOf;
 import org.estatio.dom.EstatioDomainService;
-import org.estatio.dom.party.Party;
+import org.estatio.dom.asset.Property;
 import org.estatio.dom.utils.StringUtils;
-import org.joda.time.LocalDate;
 
+@DomainService(repositoryFor = Program.class, nature=NatureOfService.VIEW)
 @DomainServiceLayout(menuOrder="35", menuBar=MenuBar.PRIMARY, named="Projects")
-@DomainService(repositoryFor = Project.class, nature=NatureOfService.VIEW)
-public class Projects extends EstatioDomainService<Project> {
+public class Programs extends EstatioDomainService<Program> {
 
-    public Projects() {
-        super(Projects.class, Project.class);
+    public Programs() {
+        super(Programs.class, Program.class);
     }
 
     @Action(semantics=SemanticsOf.NON_IDEMPOTENT)
     @MemberOrder(sequence = "1")
-    public Project newProject(
+    public Program newProgram(
             final @ParameterLayout(named="Reference") String reference,
             final @ParameterLayout(named="Name") String name,
-            final @ParameterLayout(named="Start date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate startDate,
-            final @ParameterLayout(named="End date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate endDate,
-            final @ParameterLayout(named="Responsible") Party responsible) {
+            final @ParameterLayout(named="programGoal", multiLine = 5) String programGoal,
+            final @ParameterLayout(named="Property") @Parameter(optionality=Optionality.OPTIONAL) Property property) {
         // Create project instance
-        Project project = getContainer().newTransientInstance(Project.class);
+        Program program = getContainer().newTransientInstance(Program.class);
         // Set values
-        project.setReference(reference);
-        project.setName(name);
-        project.setStartDate(startDate);
-        project.setEndDate(endDate);
-        project.setResponsible(responsible);
+        program.setReference(reference);
+        program.setName(name);
+        program.setProgramGoal(programGoal);
+        program.setProperty(property);
         // Persist it
-        persist(project);
+        persist(program);
         // Return it
-        return project;
+        return program;
     }
 
     @Action(semantics=SemanticsOf.SAFE)
-    public List<Project> allProjects() {
+    public List<Program> allPrograms() {
         return allInstances();
     }
 
     @Action(semantics=SemanticsOf.SAFE)
-    public List<Project> findProject(final @ParameterLayout(named="Name or reference") String searchStr) {
-        return allMatches("findByReferenceOrName", "matcher", StringUtils.wildcardToCaseInsensitiveRegex(searchStr));
+    public List<Program> findProgram(@ParameterLayout(named="Name or reference") final String searchStr) {
+        return allMatches("matchByReferenceOrName", "matcher", StringUtils.wildcardToCaseInsensitiveRegex(searchStr));
     }
 
-
 //    @Programmatic
-    @ActionLayout(contributed=Contributed.AS_ASSOCIATION)
-    @MemberOrder(name = "Projects", sequence = "1")
     @Action(semantics=SemanticsOf.SAFE)
-    public List<Project> projects(final Party party) {
-        return allMatches("findByResponsible", "responsible", party);
+    @ActionLayout(contributed=Contributed.AS_ASSOCIATION)
+    public List<Program> programs(final Property property) {
+        return allMatches("findByProperty", "property", property);
     }
 
 }
