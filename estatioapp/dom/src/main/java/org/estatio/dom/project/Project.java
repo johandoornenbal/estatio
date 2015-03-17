@@ -11,14 +11,12 @@ import javax.jdo.annotations.Query;
 import javax.jdo.annotations.Version;
 import javax.jdo.annotations.VersionStrategy;
 
-import org.joda.time.LocalDate;
-
 import org.apache.isis.applib.annotation.Named;
 import org.apache.isis.applib.annotation.Title;
-
-import org.estatio.dom.EstatioMutableObject;
+import org.estatio.dom.EstatioDomainObject;
 import org.estatio.dom.asset.Property;
 import org.estatio.dom.party.Party;
+import org.joda.time.LocalDate;
 
 @PersistenceCapable(identityType = IdentityType.DATASTORE)
 @DatastoreIdentity(strategy = IdGeneratorStrategy.NATIVE, column = "id")
@@ -45,7 +43,7 @@ import org.estatio.dom.party.Party;
                         "FROM org.estatio.dom.project.Project " +
                         "WHERE property == :property ")
 })
-public class Project extends EstatioMutableObject<Project> {
+public class Project extends EstatioDomainObject<Project> {
 
     public Project() {
         super("reference,startDate");
