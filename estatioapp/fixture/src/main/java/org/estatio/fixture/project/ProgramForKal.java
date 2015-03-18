@@ -20,13 +20,13 @@ package org.estatio.fixture.project;
 
 import org.estatio.dom.asset.Property;
 import org.estatio.dom.party.Party;
-import org.estatio.fixture.asset.PropertyForGra;
+import org.estatio.fixture.asset.PropertyForKal;
 import org.estatio.fixture.party.PersonForJohnDoe;
 import org.estatio.fixture.party.PersonForLinusTorvalds;
 
-public class ProgramForGra extends ProgramAbstract {
+public class ProgramForKal extends ProgramAbstract {
 
-    public static final String PROGRAM_REFERENCE = "GRA_P1";
+    public static final String PROGRAM_REFERENCE = "KAL_P1";
 
     @Override
     protected void execute(ExecutionContext executionContext) {
@@ -35,16 +35,16 @@ public class ProgramForGra extends ProgramAbstract {
         if(isExecutePrereqs()) {
             executionContext.executeChild(this, new PersonForJohnDoe());
             executionContext.executeChild(this, new PersonForLinusTorvalds());
-            executionContext.executeChild(this, new PropertyForGra());
+            executionContext.executeChild(this, new PropertyForKal());
         }
 
         // exec
-        Property property = properties.findPropertyByReference(PropertyForGra.PROPERTY_REFERENCE);
-        Party owner = parties.findPartyByReference(PersonForLinusTorvalds.PARTY_REFERENCE);
-        Party manager = parties.findPartyByReference(PersonForJohnDoe.PARTY_REFERENCE);
+        Property property = properties.findPropertyByReference(PropertyForKal.PROPERTY_REFERENCE);
+        Party owner = parties.findPartyByReference(PersonForJohnDoe.PARTY_REFERENCE);
+        Party manager = parties.findPartyByReference(PersonForLinusTorvalds.PARTY_REFERENCE);
 
         createProgram(
-        		PROGRAM_REFERENCE, "Program 1", "Increase overall profit",property, owner, manager,
+        		PROGRAM_REFERENCE, "2nd program", "Increase customer satisfaction", property, owner, manager,
                 executionContext);
     }
 

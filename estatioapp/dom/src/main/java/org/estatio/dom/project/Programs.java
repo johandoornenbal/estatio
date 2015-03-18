@@ -28,6 +28,7 @@ import org.apache.isis.applib.annotation.DomainServiceLayout;
 import org.apache.isis.applib.annotation.DomainServiceLayout.MenuBar;
 import org.apache.isis.applib.annotation.MemberOrder;
 import org.apache.isis.applib.annotation.NatureOfService;
+import org.apache.isis.applib.annotation.NotInServiceMenu;
 import org.apache.isis.applib.annotation.Optionality;
 import org.apache.isis.applib.annotation.Parameter;
 import org.apache.isis.applib.annotation.ParameterLayout;
@@ -74,7 +75,7 @@ public class Programs extends EstatioDomainService<Program> {
         return allMatches("matchByReferenceOrName", "matcher", StringUtils.wildcardToCaseInsensitiveRegex(searchStr));
     }
 
-//    @Programmatic
+    @NotInServiceMenu
     @Action(semantics=SemanticsOf.SAFE)
     @ActionLayout(contributed=Contributed.AS_ASSOCIATION)
     public List<Program> programs(final Property property) {
