@@ -42,6 +42,7 @@ import org.estatio.fixture.lease.LeaseItemAndLeaseTermForRentForKalPoison001;
 import org.estatio.fixture.lease.LeaseItemAndTermsForOxfMiracl005;
 import org.estatio.fixture.party.PersonForGinoVannelli;
 import org.estatio.fixture.party.PersonForLinusTorvalds;
+import org.estatio.fixture.project.ProgramForGra;
 
 public class EstatioDemoFixture extends DiscoverableFixtureScript {
 
@@ -86,6 +87,8 @@ public class EstatioDemoFixture extends DiscoverableFixtureScript {
         executionContext.executeChild(this, new PropertyForGra());
         executionContext.executeChild(this, new PropertyForViv());
         executionContext.executeChild(this, new PropertyForHan());
+        
+        executionContext.executeChild(this, new ProgramForGra());
 
         final FixtureClock fixtureClock = (FixtureClock) FixtureClock.getInstance();
         fixtureClock.reset();
