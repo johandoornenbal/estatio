@@ -51,8 +51,7 @@ public class Projects extends EstatioDomainService<Project> {
             final @ParameterLayout(named="Reference") String reference,
             final @ParameterLayout(named="Name") String name,
             final @ParameterLayout(named="Start date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate startDate,
-            final @ParameterLayout(named="End date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate endDate,
-            final @ParameterLayout(named="Responsible") Party responsible) {
+            final @ParameterLayout(named="End date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate endDate) {
         // Create project instance
         Project project = getContainer().newTransientInstance(Project.class);
         // Set values
@@ -60,7 +59,6 @@ public class Projects extends EstatioDomainService<Project> {
         project.setName(name);
         project.setStartDate(startDate);
         project.setEndDate(endDate);
-        project.setResponsible(responsible);
         // Persist it
         persist(project);
         // Return it
