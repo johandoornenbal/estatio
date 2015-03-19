@@ -21,6 +21,7 @@ package org.estatio.dom.project;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.inject.Inject;
 import javax.jdo.annotations.Column;
 import javax.jdo.annotations.DatastoreIdentity;
 import javax.jdo.annotations.IdGeneratorStrategy;
@@ -38,7 +39,6 @@ import org.apache.isis.applib.annotation.Editing;
 import org.apache.isis.applib.annotation.Optionality;
 import org.apache.isis.applib.annotation.Parameter;
 import org.apache.isis.applib.annotation.ParameterLayout;
-import org.apache.isis.applib.annotation.Programmatic;
 //import org.apache.isis.applib.annotation.Property;
 import org.apache.isis.applib.annotation.PropertyLayout;
 import org.apache.isis.applib.annotation.RenderType;
@@ -140,17 +140,17 @@ public class Program
     
     // //////////////////////////////////////
     
-    @javax.jdo.annotations.Persistent(mappedBy = "program")
-    private SortedSet<Project> projects = new TreeSet<Project>();
-
-    @CollectionLayout(render=RenderType.EAGERLY)
-    public SortedSet<Project> getProjects() {
-        return projects;
-    }
-
-    public void setProjects(final SortedSet<Project> projects) {
-        this.projects = projects;
-    }    
+//    @javax.jdo.annotations.Persistent(mappedBy = "program")
+//    private SortedSet<Project> projects = new TreeSet<Project>();
+//
+//    @CollectionLayout(render=RenderType.EAGERLY)
+//    public SortedSet<Project> getProjects() {
+//        return projects;
+//    }
+//
+//    public void setProjects(final SortedSet<Project> projects) {
+//        this.projects = projects;
+//    }    
 
     // //////////////////////////////////////
 
@@ -166,42 +166,8 @@ public class Program
         this.roles = roles;
     }
     
-    public Program newRole(
-            final @ParameterLayout(named = "Type") ProgramRoleType type,
-            final Party party,
-            final @ParameterLayout(named = "Start date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate startDate,
-            final @ParameterLayout(named = "End date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate endDate) {
-        createRole(type, party, startDate, endDate);
-        return this;
-    }
 
-    public String validateNewRole(
-            final ProgramRoleType type,
-            final Party party,
-            final LocalDate startDate,
-            final LocalDate endDate) {
-        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
-            return "End date cannot be earlier than start date";
-        }
-        if (!Sets.filter(getRoles(), type.matchingRole()).isEmpty()) {
-            return "Add a successor/predecessor from existing role";
-        }
-        return null;
-    }
-
-    @Programmatic
-    public ProgramRole createRole(
-            final ProgramRoleType type, final Party party, final LocalDate startDate, final LocalDate endDate) {
-        final ProgramRole role = newTransientInstance(ProgramRole.class);
-        role.setStartDate(startDate);
-        role.setEndDate(endDate);
-        role.setType(type);
-        role.setParty(party);
-        role.setProgram(this);
-
-        persistIfNotAlready(role);
-
-        return role;
-    }
+    @Inject
+	public ProgramRoles programRoles;
 
 }

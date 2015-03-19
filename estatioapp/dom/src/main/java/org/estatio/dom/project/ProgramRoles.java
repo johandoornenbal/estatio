@@ -26,10 +26,16 @@ import org.apache.isis.applib.annotation.Contributed;
 import org.apache.isis.applib.annotation.DomainService;
 import org.apache.isis.applib.annotation.DomainServiceLayout;
 import org.apache.isis.applib.annotation.NatureOfService;
+import org.apache.isis.applib.annotation.Optionality;
+import org.apache.isis.applib.annotation.Parameter;
+import org.apache.isis.applib.annotation.ParameterLayout;
+import org.apache.isis.applib.annotation.Programmatic;
 import org.apache.isis.applib.annotation.SemanticsOf;
 import org.estatio.dom.EstatioDomainService;
 import org.estatio.dom.party.Party;
 import org.joda.time.LocalDate;
+
+import com.google.common.collect.Sets;
 
 @DomainService(nature=NatureOfService.DOMAIN, repositoryFor = ProgramRole.class)
 @DomainServiceLayout(menuOrder="10")
@@ -96,5 +102,54 @@ public class ProgramRoles extends EstatioDomainService<ProgramRole> {
                 "party", party,
                 "type", type);
     }
+    
+    public Program newRole(
+    		final Program program,
+            final @ParameterLayout(named = "Type") ProgramRoleType type,
+            final Party party,
+            final @ParameterLayout(named = "Start date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate startDate,
+            final @ParameterLayout(named = "End date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate endDate) {
+        createRole(program, type, party, startDate, endDate);
+        return program;
+    }
+
+    public String validateNewRole(
+    		final Program program,
+            final ProgramRoleType type,
+            final Party party,
+            final LocalDate startDate,
+            final LocalDate endDate) {
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            return "End date cannot be earlier than start date";
+        }
+      
+        
+        if(findRole(program, party, type)!=null){
+        	return "Role already exists";
+        }
+        return null;
+    }
+
+
+	@Programmatic
+	public ProgramRole createRole(
+	        final Program program, 
+	        final ProgramRoleType type, 
+	        final Party party, 
+	        final LocalDate startDate, 
+	        final LocalDate endDate) {
+	    final ProgramRole role = newTransientInstance(ProgramRole.class);
+	    role.setStartDate(startDate);
+	    role.setEndDate(endDate);
+	    role.setType(type);
+	    role.setParty(party);
+	    role.setProgram(program);
+	    persistIfNotAlready(role);
+	    return role;
+	}
 
 }
+
+
+
+

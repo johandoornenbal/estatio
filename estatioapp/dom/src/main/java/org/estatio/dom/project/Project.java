@@ -78,7 +78,7 @@ public class Project
 		implements WithReferenceUnique {
 
     public Project() {
-        super("reference,startDate");
+        super("reference, name, startDate");
     }
 
     // //////////////////////////////////////

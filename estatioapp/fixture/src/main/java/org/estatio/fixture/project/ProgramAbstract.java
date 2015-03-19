@@ -45,8 +45,8 @@ public abstract class ProgramAbstract extends EstatioFixtureScript {
             final Party boardmember,
             final ExecutionContext fixtureResults) {
         Program program = programs.newProgram(reference, name, programGoal, property);
-        program.createRole(ProgramRoleType.PROGRAM_OWNER, owner, ld(1999, 1, 1), ld(2000, 1, 1));
-        program.createRole(ProgramRoleType.PROGRAM_BOARDMEMBER, boardmember, ld(1999, 7, 1), ld(2000, 1, 1));
+        program.programRoles.createRole(program, ProgramRoleType.PROGRAM_OWNER, owner, ld(1999, 1, 1), ld(2000, 1, 1));
+        program.programRoles.createRole(program, ProgramRoleType.PROGRAM_BOARDMEMBER, boardmember, ld(1999, 7, 1), ld(2000, 1, 1));
         return fixtureResults.addResult(this, program.getReference(), program);
     }
 

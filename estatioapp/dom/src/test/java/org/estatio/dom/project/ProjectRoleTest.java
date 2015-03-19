@@ -67,11 +67,11 @@ public class ProjectRoleTest {
         @Override
         protected List<List<ProjectRole>> orderedTuples() {
             return listOf(
-//                    listOf(
-//                            newProjectRole(null, null, null, null),
-//                            newProjectRole(project1, null, null, null),
-//                            newProjectRole(project1, null, null, null),
-//                            newProjectRole(project2, null, null, null)),
+                    listOf(
+                            newProjectRole(null, null, null, null),
+                            newProjectRole(project1, null, null, null),
+                            newProjectRole(project1, null, null, null),
+                            newProjectRole(project2, null, null, null)),
                     listOf(
                     		newProjectRole(project1, new LocalDate(2012,4,2), null, null),
                     		newProjectRole(project1, new LocalDate(2012,3,1), null, null),

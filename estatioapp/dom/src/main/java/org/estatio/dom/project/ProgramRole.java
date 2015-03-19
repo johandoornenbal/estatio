@@ -278,7 +278,7 @@ public class ProgramRole
 
         @Override
         public ProgramRole newRole(final LocalDate startDate, final LocalDate endDate) {
-            return pr.getProgram().createRole(pr.getType(), party, startDate, endDate);
+            return pr.getProgram().programRoles.createRole(pr.getProgram(), pr.getType(), party, startDate, endDate);
         }
     }
 

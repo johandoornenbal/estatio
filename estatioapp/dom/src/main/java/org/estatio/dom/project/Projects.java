@@ -23,8 +23,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.isis.applib.annotation.Action;
-import org.apache.isis.applib.annotation.ActionLayout;
-import org.apache.isis.applib.annotation.Contributed;
 import org.apache.isis.applib.annotation.DomainService;
 import org.apache.isis.applib.annotation.DomainServiceLayout;
 import org.apache.isis.applib.annotation.DomainServiceLayout.MenuBar;
@@ -33,6 +31,7 @@ import org.apache.isis.applib.annotation.NatureOfService;
 import org.apache.isis.applib.annotation.Optionality;
 import org.apache.isis.applib.annotation.Parameter;
 import org.apache.isis.applib.annotation.ParameterLayout;
+import org.apache.isis.applib.annotation.Programmatic;
 import org.apache.isis.applib.annotation.SemanticsOf;
 import org.estatio.dom.EstatioDomainService;
 import org.estatio.dom.party.Party;
@@ -83,14 +82,15 @@ public class Projects extends EstatioDomainService<Project> {
         return allMatches("matchByReferenceOrName", "matcher", StringUtils.wildcardToCaseInsensitiveRegex(searchStr));
     }
 
+    @Programmatic
+	public List<Project> findByResponsible(final Party party) {
+		return allMatches("findByResponsible", "responsible", party);
+	}
 
-//    @Programmatic
-    @ActionLayout(contributed=Contributed.AS_ASSOCIATION)
-    @MemberOrder(name = "Projects", sequence = "1")
-    @Action(semantics=SemanticsOf.SAFE)
-    public List<Project> projects(final Party party) {
-        return allMatches("findByResponsible", "responsible", party);
-    }
+    @Programmatic
+	public List<Project> findByProgram(final Program program) {
+		return allMatches("findByProgram", "program", program);
+	}
     
     @Inject
     Programs programs;
