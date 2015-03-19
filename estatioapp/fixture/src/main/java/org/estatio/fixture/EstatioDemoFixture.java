@@ -44,6 +44,8 @@ import org.estatio.fixture.party.PersonForGinoVannelli;
 import org.estatio.fixture.party.PersonForLinusTorvalds;
 import org.estatio.fixture.project.ProgramForGra;
 import org.estatio.fixture.project.ProgramForKal;
+import org.estatio.fixture.project.ProjectsForGra;
+import org.estatio.fixture.project.ProjectsForKal;
 
 public class EstatioDemoFixture extends DiscoverableFixtureScript {
 
@@ -91,6 +93,9 @@ public class EstatioDemoFixture extends DiscoverableFixtureScript {
         
         executionContext.executeChild(this, new ProgramForGra());
         executionContext.executeChild(this, new ProgramForKal());
+        
+        executionContext.executeChild(this, new ProjectsForKal());
+        executionContext.executeChild(this, new ProjectsForGra());
 
         final FixtureClock fixtureClock = (FixtureClock) FixtureClock.getInstance();
         fixtureClock.reset();

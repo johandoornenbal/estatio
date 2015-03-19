@@ -52,8 +52,8 @@ public class ProjectRoles extends EstatioDomainService<ProjectRole> {
     @Action(semantics=SemanticsOf.SAFE)
     @ActionLayout(contributed=Contributed.AS_NEITHER)
     public ProjectRole findRole(
-            final Program project,
-            final ProgramRoleType type) {
+            final Project project,
+            final ProjectRoleType type) {
         return firstMatch("findByProjectAndType",
                 "project", project,
                 "type", type);
@@ -74,9 +74,9 @@ public class ProjectRoles extends EstatioDomainService<ProjectRole> {
     @Action(semantics=SemanticsOf.SAFE)
     @ActionLayout(contributed=Contributed.AS_NEITHER)
     public ProjectRole findRole(
-            final Program project,
+            final Project project,
             final Party party,
-            final ProgramRoleType type) {
+            final ProjectRoleType type) {
         return firstMatch("findByProjectAndPartyAndType",
                 "project", project,
                 "party", party,
@@ -86,9 +86,9 @@ public class ProjectRoles extends EstatioDomainService<ProjectRole> {
     @Action(semantics=SemanticsOf.SAFE)
     @ActionLayout(contributed=Contributed.AS_NEITHER)
     public ProjectRole findRole(
-            final Program project,
+            final Project project,
             final Party party,
-            final ProgramRoleType type,
+            final ProjectRoleType type,
             final LocalDate startDate,
             final LocalDate endDate) {
         return firstMatch("findByProjectAndPartyAndType",

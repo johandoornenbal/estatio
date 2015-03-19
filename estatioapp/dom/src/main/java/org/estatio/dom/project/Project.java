@@ -43,6 +43,7 @@ import org.apache.isis.applib.annotation.Property;
 import org.apache.isis.applib.annotation.PropertyLayout;
 import org.apache.isis.applib.annotation.RenderType;
 import org.apache.isis.applib.annotation.Title;
+import org.apache.isis.applib.annotation.Where;
 import org.estatio.dom.EstatioDomainObject;
 import org.estatio.dom.RegexValidation;
 import org.estatio.dom.WithReferenceUnique;
@@ -61,7 +62,7 @@ import com.google.common.collect.Sets;
                         "FROM org.estatio.dom.project.Project " +
                         "WHERE reference == :reference "),
         @Query(
-                name = "findByReferenceOrName", language = "JDOQL",
+                name = "matchByReferenceOrName", language = "JDOQL",
                 value = "SELECT " +
                         "FROM org.estatio.dom.project.Project " +
                         "WHERE reference.matches(:matcher) || name.matches(:matcher) "),
@@ -138,16 +139,17 @@ public class Project
 
     // //////////////////////////////////////
 
-//    private Party responsible;
-//
-//    @Column(allowsNull = "false")
-//    public Party getResponsible() {
-//        return responsible;
-//    }
-//
-//    public void setResponsible(Party responsible) {
-//        this.responsible = responsible;
-//    }
+    private Program program;
+
+    @Column(allowsNull = "false")
+    @Property(hidden=Where.REFERENCES_PARENT)
+    public Program getProgram() {
+        return program;
+    }
+
+    public void setProgram(Program program) {
+        this.program = program;
+    }
 
     // //////////////////////////////////////
 

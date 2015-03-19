@@ -27,16 +27,17 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.isis.applib.fixturescripts.FixtureScript;
-import org.estatio.dom.project.Program;
-import org.estatio.dom.project.Programs;
+import org.estatio.dom.project.Project;
+import org.estatio.dom.project.Projects;
 import org.estatio.fixture.EstatioBaseLineFixture;
-import org.estatio.fixture.project.ProgramForGra;
-import org.estatio.fixture.project.ProgramForKal;
+import org.estatio.fixture.party.OrganisationForTopModel;
+import org.estatio.fixture.project.ProjectsForGra;
+import org.estatio.fixture.project.ProjectsForKal;
 import org.estatio.integtests.EstatioIntegrationTest;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ProgramsTest extends EstatioIntegrationTest {
+public class ProjectsTest extends EstatioIntegrationTest {
 
     @Before
     public void setupData() {
@@ -44,57 +45,59 @@ public class ProgramsTest extends EstatioIntegrationTest {
             @Override
             protected void execute(ExecutionContext executionContext) {
                 executionContext.executeChild(this, new EstatioBaseLineFixture());
-
-                executionContext.executeChild(this, new ProgramForGra());
-                executionContext.executeChild(this, new ProgramForKal());
+                
+                executionContext.executeChild(this, new OrganisationForTopModel());
+                executionContext.executeChild(this, new ProjectsForKal());
+                executionContext.executeChild(this, new ProjectsForGra());
+                
             }
         });
     }
 
     @Inject
-    Programs programs;
+    Projects projects;
 
-    public static class AllPrograms extends ProgramsTest {
+    public static class AllProjects extends ProjectsTest {
 
         @Test
-        public void returnAllPrograms() throws Exception {
+        public void returnAllProjects() throws Exception {
             // when
-            List<Program> allPrograms = programs.allPrograms();
+            List<Project> allProjects = projects.allProjects();
 
             // then
-            assertThat(allPrograms.size(), is(2));
+            assertThat(allProjects.size(), is(3));
         }
 
     }
 
-    public static class FindPrograms extends ProgramsTest {
+    public static class FindProjects extends ProjectsTest {
 
         @Test
         public void withReference() throws Exception {
-            final List<Program> progs = programs.findProgram("KAL_P1");
-            assertNotNull(progs);
-            assertThat(progs.size(), is(1));
+            final List<Project> projs = projects.findProject("PR1");
+            assertNotNull(projs);
+            assertThat(projs.size(), is(1));
         }
 
         @Test
         public void withName() throws Exception {
-            final List<Program> progs = programs.findProgram("Program 1");
-            assertNotNull(progs);
-            assertThat(progs.size(), is(1));
+            final List<Project> projs = projects.findProject("Augment parkingplace");
+            assertNotNull(projs);
+            assertThat(projs.size(), is(1));
         }
 
         @Test
         public void withWildcard() throws Exception {
-            final List<Program> progs = programs.findProgram("Pro*");
-            assertNotNull(progs);
-            assertThat(progs.size(), is(1));
+            final List<Project> projs = projects.findProject("Augm*");
+            assertNotNull(projs);
+            assertThat(projs.size(), is(1));
         }
 
         @Test
         public void withWildcard_returningMultiple() throws Exception {
-            final List<Program> progs = programs.findProgram("*");
-            assertNotNull(progs);
-            assertThat(progs.size(), is(2));
+            final List<Project> projs = projects.findProject("*");
+            assertNotNull(projs);
+            assertThat(projs.size(), is(3));
         }
     }
 

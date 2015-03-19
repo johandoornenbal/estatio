@@ -137,6 +137,20 @@ public class Program
     public void setProperty(Property property) {
         this.property = property;
     }
+    
+    // //////////////////////////////////////
+    
+    @javax.jdo.annotations.Persistent(mappedBy = "program")
+    private SortedSet<Project> projects = new TreeSet<Project>();
+
+    @CollectionLayout(render=RenderType.EAGERLY)
+    public SortedSet<Project> getProjects() {
+        return projects;
+    }
+
+    public void setProjects(final SortedSet<Project> projects) {
+        this.projects = projects;
+    }    
 
     // //////////////////////////////////////
 

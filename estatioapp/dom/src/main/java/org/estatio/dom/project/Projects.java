@@ -20,6 +20,8 @@ package org.estatio.dom.project;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.isis.applib.annotation.Action;
 import org.apache.isis.applib.annotation.ActionLayout;
 import org.apache.isis.applib.annotation.Contributed;
@@ -51,7 +53,8 @@ public class Projects extends EstatioDomainService<Project> {
             final @ParameterLayout(named="Reference") String reference,
             final @ParameterLayout(named="Name") String name,
             final @ParameterLayout(named="Start date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate startDate,
-            final @ParameterLayout(named="End date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate endDate) {
+            final @ParameterLayout(named="End date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate endDate,
+            final Program program) {
         // Create project instance
         Project project = getContainer().newTransientInstance(Project.class);
         // Set values
@@ -59,10 +62,15 @@ public class Projects extends EstatioDomainService<Project> {
         project.setName(name);
         project.setStartDate(startDate);
         project.setEndDate(endDate);
+        project.setProgram(program);
         // Persist it
         persist(project);
         // Return it
         return project;
+    }
+    
+    public List<Program> autoComplete4NewProject(String search) {
+    	return programs.findProgram(search);
     }
 
     @Action(semantics=SemanticsOf.SAFE)
@@ -72,7 +80,7 @@ public class Projects extends EstatioDomainService<Project> {
 
     @Action(semantics=SemanticsOf.SAFE)
     public List<Project> findProject(final @ParameterLayout(named="Name or reference") String searchStr) {
-        return allMatches("findByReferenceOrName", "matcher", StringUtils.wildcardToCaseInsensitiveRegex(searchStr));
+        return allMatches("matchByReferenceOrName", "matcher", StringUtils.wildcardToCaseInsensitiveRegex(searchStr));
     }
 
 
@@ -83,5 +91,8 @@ public class Projects extends EstatioDomainService<Project> {
     public List<Project> projects(final Party party) {
         return allMatches("findByResponsible", "responsible", party);
     }
+    
+    @Inject
+    Programs programs;
 
 }
