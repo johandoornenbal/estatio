@@ -20,6 +20,7 @@ package org.estatio.dom.project;
 
 import java.util.SortedSet;
 
+import javax.inject.Inject;
 import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.VersionStrategy;
@@ -265,6 +266,7 @@ public class ProjectRole
         return helper.getTimeline(getProject().getRoles(), getType().matchingRole());
     }
 
+    @Inject ProjectRoles projectRoles;
     // //////////////////////////////////////
 
     static final class SiblingFactory implements WithIntervalContiguous.Factory<ProjectRole> {
@@ -278,7 +280,7 @@ public class ProjectRole
 
         @Override
         public ProjectRole newRole(final LocalDate startDate, final LocalDate endDate) {
-            return pr.getProject().createRole(pr.getType(), party, startDate, endDate);
+            return pr.getProject().projectRoles.createRole(pr.getProject(),pr.getType(), party, startDate, endDate);
         }
     }
 

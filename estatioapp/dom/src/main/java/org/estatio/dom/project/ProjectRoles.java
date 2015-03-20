@@ -26,6 +26,7 @@ import org.apache.isis.applib.annotation.Contributed;
 import org.apache.isis.applib.annotation.DomainService;
 import org.apache.isis.applib.annotation.DomainServiceLayout;
 import org.apache.isis.applib.annotation.NatureOfService;
+import org.apache.isis.applib.annotation.Programmatic;
 import org.apache.isis.applib.annotation.SemanticsOf;
 import org.estatio.dom.EstatioDomainService;
 import org.estatio.dom.party.Party;
@@ -95,6 +96,25 @@ public class ProjectRoles extends EstatioDomainService<ProjectRole> {
                 "project", project,
                 "party", party,
                 "type", type);
+    }
+    
+    @Programmatic
+    public ProjectRole createRole(
+    		final Project project,
+            final ProjectRoleType type, 
+            final Party party, 
+            final LocalDate startDate, 
+            final LocalDate endDate) {
+        final ProjectRole role = newTransientInstance(ProjectRole.class);
+        role.setStartDate(startDate);
+        role.setEndDate(endDate);
+        role.setType(type);
+        role.setParty(party);
+        role.setProject(project);
+
+        persistIfNotAlready(role);
+
+        return role;
     }
 
 }

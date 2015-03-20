@@ -21,6 +21,7 @@ package org.estatio.dom.project;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import javax.inject.Inject;
 import javax.jdo.annotations.Column;
 import javax.jdo.annotations.DatastoreIdentity;
 import javax.jdo.annotations.IdGeneratorStrategy;
@@ -35,10 +36,7 @@ import javax.jdo.annotations.VersionStrategy;
 import org.apache.isis.applib.annotation.CollectionLayout;
 import org.apache.isis.applib.annotation.DomainObject;
 import org.apache.isis.applib.annotation.Editing;
-import org.apache.isis.applib.annotation.Optionality;
-import org.apache.isis.applib.annotation.Parameter;
 import org.apache.isis.applib.annotation.ParameterLayout;
-import org.apache.isis.applib.annotation.Programmatic;
 import org.apache.isis.applib.annotation.Property;
 import org.apache.isis.applib.annotation.PropertyLayout;
 import org.apache.isis.applib.annotation.RenderType;
@@ -47,10 +45,7 @@ import org.apache.isis.applib.annotation.Where;
 import org.estatio.dom.EstatioDomainObject;
 import org.estatio.dom.RegexValidation;
 import org.estatio.dom.WithReferenceUnique;
-import org.estatio.dom.party.Party;
 import org.joda.time.LocalDate;
-
-import com.google.common.collect.Sets;
 
 @PersistenceCapable(identityType = IdentityType.DATASTORE)
 @DatastoreIdentity(strategy = IdGeneratorStrategy.NATIVE, column = "id")
@@ -164,51 +159,16 @@ public class Project
     @javax.jdo.annotations.Persistent(mappedBy = "project")
     private SortedSet<ProjectRole> roles = new TreeSet<ProjectRole>();
 
-    @CollectionLayout(render=RenderType.EAGERLY)
+    @CollectionLayout(render=RenderType.EAGERLY, hidden=Where.EVERYWHERE)
     public SortedSet<ProjectRole> getRoles() {
         return roles;
     }
 
-    public void setRoles(final SortedSet<ProjectRole> roles) {
-        this.roles = roles;
-    }
+//    public void setRoles(final SortedSet<ProjectRole> roles) {
+//        this.roles = roles;
+//    }
     
-    public Project newRole(
-            final @ParameterLayout(named = "Type") ProjectRoleType type,
-            final Party party,
-            final @ParameterLayout(named = "Start date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate startDate,
-            final @ParameterLayout(named = "End date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate endDate) {
-        createRole(type, party, startDate, endDate);
-        return this;
-    }
-
-    public String validateNewRole(
-            final ProjectRoleType type,
-            final Party party,
-            final LocalDate startDate,
-            final LocalDate endDate) {
-        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
-            return "End date cannot be earlier than start date";
-        }
-        if (!Sets.filter(getRoles(), type.matchingRole()).isEmpty()) {
-            return "Add a successor/predecessor from existing role";
-        }
-        return null;
-    }
-
-    @Programmatic
-    public ProjectRole createRole(
-            final ProjectRoleType type, final Party party, final LocalDate startDate, final LocalDate endDate) {
-        final ProjectRole role = newTransientInstance(ProjectRole.class);
-        role.setStartDate(startDate);
-        role.setEndDate(endDate);
-        role.setType(type);
-        role.setParty(party);
-        role.setProject(this);
-
-        persistIfNotAlready(role);
-
-        return role;
-    }
-
+    @Inject
+	public ProjectRoles projectRoles;
+    
 }

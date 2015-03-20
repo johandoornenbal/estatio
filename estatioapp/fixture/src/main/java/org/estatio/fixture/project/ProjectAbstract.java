@@ -28,6 +28,7 @@ import org.estatio.dom.project.Program;
 import org.estatio.dom.project.Programs;
 import org.estatio.dom.project.Project;
 import org.estatio.dom.project.ProjectRoleType;
+import org.estatio.dom.project.ProjectRoles;
 import org.estatio.dom.project.Projects;
 import org.estatio.fixture.EstatioFixtureScript;
 import org.joda.time.LocalDate;
@@ -47,8 +48,8 @@ public abstract class ProjectAbstract extends EstatioFixtureScript {
             final Party manager,
             final ExecutionContext fixtureResults) {
         Project project = projects.newProject(reference, name, startDate, endDate, program);
-        project.createRole(ProjectRoleType.PROJECT_EXECUTIVE, executive, ld(1999, 1, 1), ld(2000, 1, 1));
-        project.createRole(ProjectRoleType.PROJECT_MANAGER, manager, ld(1999, 7, 1), ld(2000, 1, 1));
+        projectRoles.createRole(project, ProjectRoleType.PROJECT_EXECUTIVE, executive, ld(1999, 1, 1), ld(2000, 1, 1));
+        projectRoles.createRole(project, ProjectRoleType.PROJECT_MANAGER, manager, ld(1999, 7, 1), ld(2000, 1, 1));
         return fixtureResults.addResult(this, project.getReference(), project);
     }
 
@@ -62,5 +63,8 @@ public abstract class ProjectAbstract extends EstatioFixtureScript {
   
   @Inject
   protected Programs programs;
+  
+  @Inject 
+  protected ProjectRoles projectRoles;
 
 }

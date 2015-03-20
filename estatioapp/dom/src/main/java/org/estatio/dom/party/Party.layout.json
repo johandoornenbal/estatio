@@ -41,6 +41,11 @@
     		"actionLayout": {
       			"hidden": "EVERYWHERE" /* contributed action is hidden on one of its contributees */
     		}
-  		}
+  		},
+  		"newProjectRole": {
+  			"actionLayout": {
+  				"hidden": "EVERYWHERE" /* contributed action is hidden on one of its contributees */
+  			}
+  		}  		
   }
 }
