@@ -36,21 +36,15 @@ import javax.jdo.annotations.VersionStrategy;
 import org.apache.isis.applib.annotation.CollectionLayout;
 import org.apache.isis.applib.annotation.DomainObject;
 import org.apache.isis.applib.annotation.Editing;
-import org.apache.isis.applib.annotation.Optionality;
-import org.apache.isis.applib.annotation.Parameter;
-import org.apache.isis.applib.annotation.ParameterLayout;
 //import org.apache.isis.applib.annotation.Property;
 import org.apache.isis.applib.annotation.PropertyLayout;
 import org.apache.isis.applib.annotation.RenderType;
 import org.apache.isis.applib.annotation.Title;
+import org.apache.isis.applib.annotation.Where;
 import org.estatio.dom.EstatioDomainObject;
 import org.estatio.dom.RegexValidation;
 import org.estatio.dom.WithReferenceUnique;
 import org.estatio.dom.asset.Property;
-import org.estatio.dom.party.Party;
-import org.joda.time.LocalDate;
-
-import com.google.common.collect.Sets;
 
 @PersistenceCapable(identityType = IdentityType.DATASTORE)
 @DatastoreIdentity(strategy = IdGeneratorStrategy.NATIVE, column = "id")
@@ -153,18 +147,20 @@ public class Program
 //    }    
 
     // //////////////////////////////////////
+    
+    //TODO: decouple sorted set [momentarily needed by code in  ProgramRole getPredecessor() etc.
 
     @javax.jdo.annotations.Persistent(mappedBy = "program")
     private SortedSet<ProgramRole> roles = new TreeSet<ProgramRole>();
 
-    @CollectionLayout(render=RenderType.EAGERLY)
+    @CollectionLayout(render=RenderType.EAGERLY, hidden=Where.EVERYWHERE)
     public SortedSet<ProgramRole> getRoles() {
         return roles;
     }
 
-    public void setRoles(final SortedSet<ProgramRole> roles) {
-        this.roles = roles;
-    }
+//    public void setRoles(final SortedSet<ProgramRole> roles) {
+//        this.roles = roles;
+//    }
     
 
     @Inject

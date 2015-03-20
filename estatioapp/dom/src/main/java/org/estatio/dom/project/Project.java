@@ -67,10 +67,10 @@ import com.google.common.collect.Sets;
                         "FROM org.estatio.dom.project.Project " +
                         "WHERE reference.matches(:matcher) || name.matches(:matcher) "),
         @Query(
-                name = "findByResponsible", language = "JDOQL",
+                name = "findByProgram", language = "JDOQL",
                 value = "SELECT " +
                         "FROM org.estatio.dom.project.Project " +
-                        "WHERE responsible == :responsible ")
+                        "WHERE program == :program ")                        
 })
 @DomainObject(editing=Editing.DISABLED, autoCompleteRepository=Projects.class, autoCompleteAction = "autoComplete")
 public class Project 

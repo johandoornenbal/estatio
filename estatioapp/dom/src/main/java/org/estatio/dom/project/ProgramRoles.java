@@ -19,6 +19,10 @@
 package org.estatio.dom.project;
 
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.apache.isis.applib.annotation.Action;
 import org.apache.isis.applib.annotation.ActionLayout;
@@ -26,16 +30,11 @@ import org.apache.isis.applib.annotation.Contributed;
 import org.apache.isis.applib.annotation.DomainService;
 import org.apache.isis.applib.annotation.DomainServiceLayout;
 import org.apache.isis.applib.annotation.NatureOfService;
-import org.apache.isis.applib.annotation.Optionality;
-import org.apache.isis.applib.annotation.Parameter;
-import org.apache.isis.applib.annotation.ParameterLayout;
 import org.apache.isis.applib.annotation.Programmatic;
 import org.apache.isis.applib.annotation.SemanticsOf;
 import org.estatio.dom.EstatioDomainService;
 import org.estatio.dom.party.Party;
 import org.joda.time.LocalDate;
-
-import com.google.common.collect.Sets;
 
 @DomainService(nature=NatureOfService.DOMAIN, repositoryFor = ProgramRole.class)
 @DomainServiceLayout(menuOrder="10")
@@ -54,7 +53,7 @@ public class ProgramRoles extends EstatioDomainService<ProgramRole> {
         return firstMatch("findByProgram",
                 "program", program);
     }
-
+    
     @Action(semantics=SemanticsOf.SAFE)
     @ActionLayout(contributed=Contributed.AS_NEITHER)
     public ProgramRole findRole(
@@ -103,34 +102,6 @@ public class ProgramRoles extends EstatioDomainService<ProgramRole> {
                 "type", type);
     }
     
-    public Program newRole(
-    		final Program program,
-            final @ParameterLayout(named = "Type") ProgramRoleType type,
-            final Party party,
-            final @ParameterLayout(named = "Start date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate startDate,
-            final @ParameterLayout(named = "End date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate endDate) {
-        createRole(program, type, party, startDate, endDate);
-        return program;
-    }
-
-    public String validateNewRole(
-    		final Program program,
-            final ProgramRoleType type,
-            final Party party,
-            final LocalDate startDate,
-            final LocalDate endDate) {
-        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
-            return "End date cannot be earlier than start date";
-        }
-      
-        
-        if(findRole(program, party, type)!=null){
-        	return "Role already exists";
-        }
-        return null;
-    }
-
-
 	@Programmatic
 	public ProgramRole createRole(
 	        final Program program, 
@@ -147,6 +118,21 @@ public class ProgramRoles extends EstatioDomainService<ProgramRole> {
 	    persistIfNotAlready(role);
 	    return role;
 	}
+	
+	@Programmatic
+    public List<ProgramRole> findByProgram(final Program program) {
+        return allMatches("findByProgram", "program", program);
+    }
+	
+	//TODO: deze code werkt niet goed (persistence issues)
+	@Programmatic
+    public SortedSet<ProgramRole> findByProgramSet(final Program program) {
+		final SortedSet<ProgramRole> roles = new TreeSet<ProgramRole>();
+		for (Iterator<ProgramRole> it = allMatches("findByProgram", "program", program).iterator(); it.hasNext();){
+			roles.add(it.next());
+		}
+        return roles;
+    }
 
 }
 

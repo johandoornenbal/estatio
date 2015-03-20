@@ -34,7 +34,6 @@ import org.apache.isis.applib.annotation.ParameterLayout;
 import org.apache.isis.applib.annotation.Programmatic;
 import org.apache.isis.applib.annotation.SemanticsOf;
 import org.estatio.dom.EstatioDomainService;
-import org.estatio.dom.party.Party;
 import org.estatio.dom.utils.StringUtils;
 import org.joda.time.LocalDate;
 
@@ -81,11 +80,6 @@ public class Projects extends EstatioDomainService<Project> {
     public List<Project> findProject(final @ParameterLayout(named="Name or reference") String searchStr) {
         return allMatches("matchByReferenceOrName", "matcher", StringUtils.wildcardToCaseInsensitiveRegex(searchStr));
     }
-
-    @Programmatic
-	public List<Project> findByResponsible(final Party party) {
-		return allMatches("findByResponsible", "responsible", party);
-	}
 
     @Programmatic
 	public List<Project> findByProgram(final Program program) {

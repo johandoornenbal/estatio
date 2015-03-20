@@ -20,6 +20,7 @@ package org.estatio.dom.project;
 
 import java.util.SortedSet;
 
+import javax.inject.Inject;
 import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.VersionStrategy;
@@ -251,20 +252,24 @@ public class ProgramRole
     @Override
     public ProgramRole getPredecessor() {
         return helper.getPredecessor(getProgram().getRoles(), getType().matchingRole());
+//    	return helper.getPredecessor(programRoles.findByProgramSet(getProgram()), getType().matchingRole());
     }
 
     @Property(editing=Editing.DISABLED, optionality=Optionality.OPTIONAL, hidden=Where.ALL_TABLES)
     @Override
     public ProgramRole getSuccessor() {
         return helper.getSuccessor(getProgram().getRoles(), getType().matchingRole());
+//    	return helper.getSuccessor(programRoles.findByProgramSet(getProgram()), getType().matchingRole());
     }
 
     @CollectionLayout(render=RenderType.EAGERLY)
     @Override
     public SortedSet<ProgramRole> getTimeline() {
         return helper.getTimeline(getProgram().getRoles(), getType().matchingRole());
+//        return helper.getTimeline(programRoles.findByProgramSet(getProgram()), getType().matchingRole());
     }
 
+    @Inject ProgramRoles programRoles;
     // //////////////////////////////////////
 
     static final class SiblingFactory implements WithIntervalContiguous.Factory<ProgramRole> {
