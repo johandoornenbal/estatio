@@ -5,23 +5,47 @@ import javax.jdo.annotations.DatastoreIdentity;
 import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.PersistenceCapable;
+import javax.jdo.annotations.Queries;
+import javax.jdo.annotations.Query;
 import javax.jdo.annotations.Version;
 import javax.jdo.annotations.VersionStrategy;
 
+import org.apache.isis.applib.annotation.Action;
 import org.apache.isis.applib.annotation.DomainObject;
 import org.apache.isis.applib.annotation.Editing;
+import org.apache.isis.applib.annotation.ParameterLayout;
+import org.apache.isis.applib.annotation.Property;
 import org.apache.isis.applib.annotation.PropertyLayout;
+import org.apache.isis.applib.annotation.SemanticsOf;
+import org.apache.isis.applib.annotation.Where;
 import org.estatio.dom.EstatioDomainObject;
 import org.joda.time.LocalDate;
 
 @PersistenceCapable(identityType = IdentityType.DATASTORE)
 @DatastoreIdentity(strategy = IdGeneratorStrategy.NATIVE, column = "id")
 @Version(strategy = VersionStrategy.VERSION_NUMBER, column = "version")
+@Queries({
+    @Query(
+            name = "findByProject", language = "JDOQL",
+            value = "SELECT " +
+                    "FROM org.estatio.dom.project.BusinessCase " +
+                    "WHERE project == :project "),
+    @Query(
+            name = "findByProjectAndVersion", language = "JDOQL",
+            value = "SELECT " +
+                    "FROM org.estatio.dom.project.BusinessCase " +
+                    "WHERE project == :project && businessCaseVersion == :businessCaseVersion"),
+    @Query(
+            name = "findByProjectAndActiveVersion", language = "JDOQL",
+            value = "SELECT " +
+                    "FROM org.estatio.dom.project.BusinessCase " +
+                    "WHERE project == :project && isActiveVersion == :isActiveVersion")                       
+})
 @DomainObject(editing=Editing.DISABLED)
 public class BusinessCase extends EstatioDomainObject<BusinessCase> {
 
 	public BusinessCase() {
-		super("project, date, businessCaseDescription");
+		super("project, date, lastUpdated desc nullsLast, businessCaseDescription");
 	}
 	
 	public String title() {
@@ -94,4 +118,92 @@ public class BusinessCase extends EstatioDomainObject<BusinessCase> {
 	}
 
 	// //////////////////////////////////////
+
+	private Integer businessCaseVersion;
+	
+	@Column(allowsNull = "false")
+	public Integer getBusinessCaseVersion() {
+		return businessCaseVersion;
+	}
+
+	public void setBusinessCaseVersion(Integer businessCaseVersion) {
+		this.businessCaseVersion = businessCaseVersion;
+	}
+	
+	// //////////////////////////////////////
+	
+	private boolean isActiveVersion;
+	
+	@Column(allowsNull = "false")
+	@Property(hidden=Where.EVERYWHERE)
+	public boolean getIsActiveVersion() {
+		return isActiveVersion;
+	}
+
+	public void setIsActiveVersion(boolean isActiveVersion) {
+		this.isActiveVersion = isActiveVersion;
+	}
+
+	
+	
+	// //////////////////////////////////////
+	
+	@Action(semantics=SemanticsOf.NON_IDEMPOTENT)
+	public BusinessCase updateBusinessCase(
+			@ParameterLayout(
+					named = "Business Case Description",
+					multiLine = 5
+					)
+			final String businessCaseDescription,
+			@ParameterLayout(named = "Next review date")
+			final LocalDate reviewDate){
+		// Create businesscase instance		
+		BusinessCase businesscase = getContainer().newTransientInstance(BusinessCase.class);
+		// Set values
+		businesscase.setBusinessCaseDescription(businessCaseDescription);
+		businesscase.setDate(this.getDate());
+		new LocalDate();
+		final LocalDate now = LocalDate.now();
+		businesscase.setLastUpdated(now);
+		businesscase.setNextReviewDate(reviewDate);
+		businesscase.setProject(this.getProject());
+		businesscase.setBusinessCaseVersion(this.getBusinessCaseVersion() + 1);
+		businesscase.setIsActiveVersion(true);
+		// Persist it
+		persist(businesscase);
+		// Set old version active to false and persist it
+		this.setIsActiveVersion(false);
+		persistIfNotAlready(this);
+		
+		return businesscase;
+	}
+	
+	public String default0UpdateBusinessCase(){
+		return this.getBusinessCaseDescription();
+	}
+	
+	public LocalDate default1UpdateBusinessCase(){
+		return this.getNextReviewDate();
+	}
+	
+	public boolean hideUpdateBusinessCase(final String businessCaseDescription, final LocalDate reviewDate) {
+		
+		if (this.getIsActiveVersion()) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public String validateUpdateBusinessCase(final String businessCaseDescription, final LocalDate reviewDate) {
+		
+		if (this.getIsActiveVersion()) {
+			return null;
+		}
+		
+		return "This is no active version of the business case and cannot be updated";
+	}
+	
+	// //////////////////////////////////////
+	
 }
