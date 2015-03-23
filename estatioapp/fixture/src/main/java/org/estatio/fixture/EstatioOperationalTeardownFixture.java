@@ -60,6 +60,7 @@ public class EstatioOperationalTeardownFixture extends FixtureScript {
         
         deleteFrom("CommunicationChannel");
         
+        deleteFrom("BusinessCase");
         deleteFrom("ProjectRole");
         deleteFrom("Project");
         deleteFrom("ProgramRole");

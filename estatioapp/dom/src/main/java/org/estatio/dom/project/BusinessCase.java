@@ -197,11 +197,17 @@ public class BusinessCase extends EstatioDomainObject<BusinessCase> {
 	
 	public String validateUpdateBusinessCase(final String businessCaseDescription, final LocalDate reviewDate) {
 		
-		if (this.getIsActiveVersion()) {
-			return null;
+		if (!this.getIsActiveVersion()) {
+			return "This is no active version of the business case and cannot be updated";
 		}
 		
-		return "This is no active version of the business case and cannot be updated";
+		new LocalDate();
+		LocalDate now = LocalDate.now();
+		if (reviewDate.isBefore(now)) {
+			return "A review date should not be in the past";
+		}
+		
+		return null;
 	}
 	
 	// //////////////////////////////////////
