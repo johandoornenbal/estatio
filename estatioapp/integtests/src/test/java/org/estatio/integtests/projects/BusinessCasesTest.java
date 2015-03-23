@@ -81,7 +81,7 @@ public class BusinessCasesTest extends EstatioIntegrationTest {
     	public void setUp() throws Exception {
     		// given
     		p1 = programs.newProgram("TST", "TestProgram", "TestGoal", properties.findPropertyByReference(PropertyForKal.PROPERTY_REFERENCE));
-    		pr1 = projects.newProject("PR4", "Testproject", new LocalDate(2015,1,1), new LocalDate(2015,12,31), p1);
+    		pr1 = projects.newProject("PR4", "Testproject", new LocalDate(2015,1,1), new LocalDate(2015,12,31), null, null, null, p1);
     		
     		// when
     		bc = businesscases.newBusinessCase(pr1, BUSINESSCASE_DESCRIPTION, REVIEWDATE);
@@ -120,7 +120,7 @@ public class BusinessCasesTest extends EstatioIntegrationTest {
     	public void setUp() throws Exception {
     		// given
     		p1 = programs.newProgram("TST", "TestProgram", "TestGoal", properties.findPropertyByReference(PropertyForKal.PROPERTY_REFERENCE));
-    		pr1 = projects.newProject("PR4", "Testproject", new LocalDate(2015,1,1), new LocalDate(2015,12,31), p1);
+    		pr1 = projects.newProject("PR4", "Testproject", new LocalDate(2015,1,1), new LocalDate(2015,12,31), null, null, null, p1);
     		
     		// when
     		bc = businesscases.newBusinessCase(pr1, BUSINESSCASE_DESCRIPTION, WRONG_REVIEWDATE);
@@ -153,7 +153,7 @@ public class BusinessCasesTest extends EstatioIntegrationTest {
     	public void setUp() throws Exception {
     		// given
     		p1 = programs.newProgram("TST", "TestProgram", "TestGoal", properties.findPropertyByReference(PropertyForKal.PROPERTY_REFERENCE));
-    		pr1 = projects.newProject("PR4", "Testproject", new LocalDate(2015,1,1), new LocalDate(2015,12,31), p1);
+    		pr1 = projects.newProject("PR4", "Testproject", new LocalDate(2015,1,1), new LocalDate(2015,12,31), null, null, null, p1);
     		bc = businesscases.newBusinessCase(pr1, BUSINESSCASE_DESCRIPTION, REVIEWDATE);
     		
     		// when
@@ -208,7 +208,7 @@ public class BusinessCasesTest extends EstatioIntegrationTest {
     	public void setUp() throws Exception {
     		// given
     		p1 = programs.newProgram("TST", "TestProgram", "TestGoal", properties.findPropertyByReference(PropertyForKal.PROPERTY_REFERENCE));
-    		pr1 = projects.newProject("PR4", "Testproject", new LocalDate(2015,1,1), new LocalDate(2015,12,31), p1);
+    		pr1 = projects.newProject("PR4", "Testproject", new LocalDate(2015,1,1), new LocalDate(2015,12,31), null, null, null, p1);
     		bc = businesscases.newBusinessCase(pr1, BUSINESSCASE_DESCRIPTION, REVIEWDATE);
     		
     		// when

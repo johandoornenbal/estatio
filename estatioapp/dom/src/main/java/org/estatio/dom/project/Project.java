@@ -18,6 +18,7 @@
  */
 package org.estatio.dom.project;
 
+import java.math.BigDecimal;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -45,6 +46,7 @@ import org.apache.isis.applib.annotation.Where;
 import org.estatio.dom.EstatioDomainObject;
 import org.estatio.dom.RegexValidation;
 import org.estatio.dom.WithReferenceUnique;
+import org.estatio.dom.currency.Currency;
 import org.joda.time.LocalDate;
 
 @PersistenceCapable(identityType = IdentityType.DATASTORE)
@@ -145,8 +147,46 @@ public class Project
     public void setProgram(Program program) {
         this.program = program;
     }
+    
+    // //////////////////////////////////////
+
+    private Currency currency;
+
+    @Column(allowsNull = "true")
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(final Currency currency) {
+        this.currency = currency;
+    }
 
     // //////////////////////////////////////
+    
+    private BigDecimal estimatedCost;
+    
+    @Column(allowsNull = "true")
+    public BigDecimal getEstimatedCost() {
+		return estimatedCost;
+	}
+
+	public void setEstimatedCost(BigDecimal estimatedCost) {
+		this.estimatedCost = estimatedCost;
+	}
+
+    // //////////////////////////////////////
+	
+	private ProjectPhase projectPhase;
+	
+	@Column(allowsNull = "true")
+	public ProjectPhase getProjectPhase() {
+		return projectPhase;
+	}
+
+	public void setProjectPhase(ProjectPhase projectPhase) {
+		this.projectPhase = projectPhase;
+	}
+  
 
     // TODO: validatie op leeg zijn startdatum enzo
     public Project postponeOneWeek(@ParameterLayout(named="Reason") String reason) {
@@ -167,8 +207,8 @@ public class Project
 //    public void setRoles(final SortedSet<ProjectRole> roles) {
 //        this.roles = roles;
 //    }
-    
-    @Inject
+
+	@Inject
 	public ProjectRoles projectRoles;
     
 }

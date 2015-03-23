@@ -20,14 +20,18 @@ package org.estatio.fixture.project;
 
 import static org.estatio.integtests.VT.ld;
 
+import java.math.BigDecimal;
+
 import javax.inject.Inject;
 
+import org.estatio.dom.currency.Currency;
 import org.estatio.dom.party.Parties;
 import org.estatio.dom.party.Party;
 import org.estatio.dom.project.BusinessCases;
 import org.estatio.dom.project.Program;
 import org.estatio.dom.project.Programs;
 import org.estatio.dom.project.Project;
+import org.estatio.dom.project.ProjectPhase;
 import org.estatio.dom.project.ProjectRoleType;
 import org.estatio.dom.project.ProjectRoles;
 import org.estatio.dom.project.Projects;
@@ -43,12 +47,15 @@ public abstract class ProjectAbstract extends EstatioFixtureScript {
             final String reference, 
             final String name, 
             final LocalDate startDate,
-            final LocalDate endDate, 
+            final LocalDate endDate,
+            final Currency currency,
+            final BigDecimal estimatedCost,
+            final ProjectPhase projectPhase,
             final Program program,
             final Party executive,
             final Party manager,
             final ExecutionContext fixtureResults) {
-        Project project = projects.newProject(reference, name, startDate, endDate, program);
+        Project project = projects.newProject(reference, name, startDate, endDate, currency, estimatedCost, projectPhase, program);
         projectRoles.createRole(project, ProjectRoleType.PROJECT_EXECUTIVE, executive, ld(1999, 1, 1), ld(2000, 1, 1));
         projectRoles.createRole(project, ProjectRoleType.PROJECT_MANAGER, manager, ld(1999, 7, 1), ld(2000, 1, 1));
         businesscases.newBusinessCase(project, "Business case description for " + project.getName(), ld(1999,7,1), ld(1999,1,1), null, 1, false);

@@ -18,6 +18,7 @@
  */
 package org.estatio.dom.project;
 
+import java.util.Iterator;
 import java.util.SortedSet;
 
 import javax.inject.Inject;
@@ -219,6 +220,23 @@ public class ProjectRole
     public String validateChangeDates(
             final LocalDate startDate,
             final LocalDate endDate) {
+    	
+        LocalDateInterval newInterval = new LocalDateInterval(startDate, endDate);
+        for (Iterator<ProjectRole> it = projectRoles.findByProject(project).iterator(); it.hasNext();){
+        	
+        	ProjectRole pr = it.next();
+        	if (!(pr.equals(this)) && pr.getParty().equals(party) && pr.getType().equals(type)){
+        		
+        		LocalDateInterval oldInterval = new LocalDateInterval(pr.getStartDate(), pr.getEndDate());
+        		
+        		if (newInterval.overlaps(oldInterval)) {
+        			return "Same party, same role, cannot have overlapping period";
+        		}
+        		
+        	}
+        	
+        }
+    	
         return helper.validateChangeDates(startDate, endDate);
     }
 

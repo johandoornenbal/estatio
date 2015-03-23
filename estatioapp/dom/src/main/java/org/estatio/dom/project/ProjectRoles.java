@@ -19,6 +19,7 @@
 package org.estatio.dom.project;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.isis.applib.annotation.Action;
 import org.apache.isis.applib.annotation.ActionLayout;
@@ -117,4 +118,8 @@ public class ProjectRoles extends EstatioDomainService<ProjectRole> {
         return role;
     }
 
+	@Programmatic
+    public List<ProjectRole> findByProject(final Project project) {
+        return allMatches("findByProject", "project", project);
+    }
 }

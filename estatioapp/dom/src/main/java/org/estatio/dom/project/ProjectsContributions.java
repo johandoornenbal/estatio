@@ -18,6 +18,7 @@
  */
 package org.estatio.dom.project;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -29,9 +30,14 @@ import org.apache.isis.applib.annotation.Contributed;
 import org.apache.isis.applib.annotation.DomainService;
 import org.apache.isis.applib.annotation.MemberOrder;
 import org.apache.isis.applib.annotation.NatureOfService;
+import org.apache.isis.applib.annotation.Optionality;
+import org.apache.isis.applib.annotation.Parameter;
+import org.apache.isis.applib.annotation.ParameterLayout;
 import org.apache.isis.applib.annotation.RenderType;
 import org.apache.isis.applib.annotation.SemanticsOf;
 import org.estatio.dom.EstatioDomainService;
+import org.estatio.dom.currency.Currency;
+import org.joda.time.LocalDate;
 
 @DomainService(nature = NatureOfService.VIEW_CONTRIBUTIONS_ONLY)
 public class ProjectsContributions extends EstatioDomainService<Project> {
@@ -40,12 +46,19 @@ public class ProjectsContributions extends EstatioDomainService<Project> {
 		super(ProjectsContributions.class, Project.class);
 	}
 
-//	@ActionLayout(contributed = Contributed.AS_ASSOCIATION)
-//	@MemberOrder(name = "Projects", sequence = "1")
-//	@Action(semantics = SemanticsOf.SAFE)
-//	public List<Project> projects(final Party party) {
-//		return projects.findByResponsible(party);
-//	}
+    @Action(semantics=SemanticsOf.NON_IDEMPOTENT)
+    @MemberOrder(sequence = "1")
+    public Project newProject(
+            final @ParameterLayout(named="Reference") String reference,
+            final @ParameterLayout(named="Name") String name,
+            final @ParameterLayout(named="Start date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate startDate,
+            final @ParameterLayout(named="End date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate endDate,
+            final @ParameterLayout(named="Currency") @Parameter(optionality=Optionality.OPTIONAL) Currency currency,
+            final @ParameterLayout(named="Estimated Cost") @Parameter(optionality=Optionality.OPTIONAL) BigDecimal estimatedCost,
+            final @ParameterLayout(named="Project phase") @Parameter(optionality=Optionality.OPTIONAL) ProjectPhase projectPhase,
+            final Program program) {
+        return projects.newProject(reference, name, startDate, endDate, currency, estimatedCost, projectPhase, program);
+    }
 
 	@ActionLayout(contributed = Contributed.AS_ASSOCIATION)
 	@CollectionLayout(render=RenderType.EAGERLY)
@@ -57,5 +70,8 @@ public class ProjectsContributions extends EstatioDomainService<Project> {
 
 	@Inject
 	Projects projects;
+	
+	@Inject
+	Program programs;
 
 }

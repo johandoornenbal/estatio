@@ -22,6 +22,7 @@ import static org.estatio.integtests.VT.ld;
 
 import org.estatio.dom.party.Party;
 import org.estatio.dom.project.Program;
+import org.estatio.dom.project.ProjectPhase;
 import org.estatio.fixture.asset.PropertyForKal;
 import org.estatio.fixture.party.PersonForJohnDoe;
 import org.estatio.fixture.party.PersonForLinusTorvalds;
@@ -48,11 +49,11 @@ public class ProjectsForKal extends ProjectAbstract {
         Program program = programs.findProgram(ProgramForKal.PROGRAM_REFERENCE).get(0);
 
         createProject(
-        		PROJECT_REFERENCE, "Augment parkingplace", ld(1999, 1, 1), ld(1999, 7, 1), program, executive, manager,
+        		PROJECT_REFERENCE, "Augment parkingplace", ld(1999, 1, 1), ld(1999, 7, 1), null, null, ProjectPhase.EXECUTION, program, executive, manager,
                 executionContext);
         
         createProject(
-        		PROJECT_REFERENCE2, "Broaden entrance", ld(1999, 4, 1), ld(1999, 5, 1), program, executive, manager,
+        		PROJECT_REFERENCE2, "Broaden entrance", ld(1999, 4, 1), ld(1999, 5, 1), null, null , ProjectPhase.INITIATION, program, executive, manager,
                 executionContext);
     }
 

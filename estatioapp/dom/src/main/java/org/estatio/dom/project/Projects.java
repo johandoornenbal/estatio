@@ -18,6 +18,7 @@
  */
 package org.estatio.dom.project;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -26,14 +27,12 @@ import org.apache.isis.applib.annotation.Action;
 import org.apache.isis.applib.annotation.DomainService;
 import org.apache.isis.applib.annotation.DomainServiceLayout;
 import org.apache.isis.applib.annotation.DomainServiceLayout.MenuBar;
-import org.apache.isis.applib.annotation.MemberOrder;
 import org.apache.isis.applib.annotation.NatureOfService;
-import org.apache.isis.applib.annotation.Optionality;
-import org.apache.isis.applib.annotation.Parameter;
 import org.apache.isis.applib.annotation.ParameterLayout;
 import org.apache.isis.applib.annotation.Programmatic;
 import org.apache.isis.applib.annotation.SemanticsOf;
 import org.estatio.dom.EstatioDomainService;
+import org.estatio.dom.currency.Currency;
 import org.estatio.dom.utils.StringUtils;
 import org.joda.time.LocalDate;
 
@@ -45,31 +44,7 @@ public class Projects extends EstatioDomainService<Project> {
         super(Projects.class, Project.class);
     }
 
-    @Action(semantics=SemanticsOf.NON_IDEMPOTENT)
-    @MemberOrder(sequence = "1")
-    public Project newProject(
-            final @ParameterLayout(named="Reference") String reference,
-            final @ParameterLayout(named="Name") String name,
-            final @ParameterLayout(named="Start date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate startDate,
-            final @ParameterLayout(named="End date") @Parameter(optionality=Optionality.OPTIONAL) LocalDate endDate,
-            final Program program) {
-        // Create project instance
-        Project project = getContainer().newTransientInstance(Project.class);
-        // Set values
-        project.setReference(reference);
-        project.setName(name);
-        project.setStartDate(startDate);
-        project.setEndDate(endDate);
-        project.setProgram(program);
-        // Persist it
-        persist(project);
-        // Return it
-        return project;
-    }
-    
-    public List<Program> autoComplete4NewProject(String search) {
-    	return programs.findProgram(search);
-    }
+
 
     @Action(semantics=SemanticsOf.SAFE)
     public List<Project> allProjects() {
@@ -85,6 +60,33 @@ public class Projects extends EstatioDomainService<Project> {
 	public List<Project> findByProgram(final Program program) {
 		return allMatches("findByProgram", "program", program);
 	}
+    
+    @Programmatic
+    public Project newProject(
+            final String reference,
+            final String name,
+            final LocalDate startDate,
+            final LocalDate endDate,
+            final Currency currency,
+            final BigDecimal estimatedCost,
+            final ProjectPhase projectPhase,
+            final Program program) {
+        // Create project instance
+        Project project = getContainer().newTransientInstance(Project.class);
+        // Set values
+        project.setReference(reference);
+        project.setName(name);
+        project.setStartDate(startDate);
+        project.setEndDate(endDate);
+        project.setProgram(program);
+        project.setCurrency(currency);
+        project.setEstimatedCost(estimatedCost);
+        project.setProjectPhase(projectPhase);
+        // Persist it
+        persist(project);
+        // Return it
+        return project;
+    }
     
     @Inject
     Programs programs;

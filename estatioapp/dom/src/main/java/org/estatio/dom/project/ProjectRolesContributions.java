@@ -18,6 +18,7 @@
  */
 package org.estatio.dom.project;
 
+import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -35,6 +36,7 @@ import org.apache.isis.applib.annotation.RenderType;
 import org.apache.isis.applib.annotation.SemanticsOf;
 import org.estatio.dom.EstatioDomainService;
 import org.estatio.dom.party.Party;
+import org.estatio.dom.valuetypes.LocalDateInterval;
 import org.joda.time.LocalDate;
 
 @DomainService(nature=NatureOfService.VIEW_CONTRIBUTIONS_ONLY)
@@ -77,9 +79,23 @@ public class ProjectRolesContributions extends EstatioDomainService<ProjectRole>
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             return "End date cannot be earlier than start date";
         }
-//        if (!Sets.filter(getRoles(), type.matchingRole()).isEmpty()) {
-//            return "Add a successor/predecessor from existing role";
-//        }
+
+        LocalDateInterval newInterval = new LocalDateInterval(startDate, endDate);
+        for (Iterator<ProjectRole> it = projectRoles.findByProject(project).iterator(); it.hasNext();){
+        	
+        	ProjectRole pr = it.next();
+        	if (pr.getParty().equals(party) && pr.getType().equals(type)){
+        		
+        		LocalDateInterval oldInterval = new LocalDateInterval(pr.getStartDate(), pr.getEndDate());
+        		
+        		if (newInterval.overlaps(oldInterval)) {
+        			return "Same party, same role, cannot have overlapping period";
+        		}
+        		
+        	}
+        	
+        }
+        
         return null;
     }
 

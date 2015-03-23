@@ -22,6 +22,7 @@ import static org.estatio.integtests.VT.ld;
 
 import org.estatio.dom.party.Party;
 import org.estatio.dom.project.Program;
+import org.estatio.dom.project.ProjectPhase;
 import org.estatio.fixture.asset.PropertyForGra;
 import org.estatio.fixture.party.PersonForGinoVannelli;
 import org.estatio.fixture.party.PersonForJohnDoe;
@@ -47,7 +48,7 @@ public class ProjectsForGra extends ProjectAbstract {
         Program program = programs.findProgram(ProgramForGra.PROGRAM_REFERENCE).get(0);
 
         createProject(
-        		PROJECT_REFERENCE, "Place commercial signs", ld(1999, 1, 1), ld(1999, 7, 1), program, executive, manager,
+        		PROJECT_REFERENCE, "Place commercial signs", ld(1999, 1, 1), ld(1999, 7, 1), null, null, ProjectPhase.EXECUTION, program, executive, manager,
                 executionContext);
     }
 
