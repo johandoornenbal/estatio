@@ -24,6 +24,7 @@ import javax.inject.Inject;
 
 import org.estatio.dom.party.Parties;
 import org.estatio.dom.party.Party;
+import org.estatio.dom.project.BusinessCases;
 import org.estatio.dom.project.Program;
 import org.estatio.dom.project.Programs;
 import org.estatio.dom.project.Project;
@@ -50,6 +51,8 @@ public abstract class ProjectAbstract extends EstatioFixtureScript {
         Project project = projects.newProject(reference, name, startDate, endDate, program);
         projectRoles.createRole(project, ProjectRoleType.PROJECT_EXECUTIVE, executive, ld(1999, 1, 1), ld(2000, 1, 1));
         projectRoles.createRole(project, ProjectRoleType.PROJECT_MANAGER, manager, ld(1999, 7, 1), ld(2000, 1, 1));
+        businesscases.newBusinessCase(project, "Business case description for " + project.getName(), ld(1999,7,1), ld(1999,1,1), null, 1, false);
+        businesscases.newBusinessCase(project, "Updated business case description for " + project.getName(), ld(1999,8,1), ld(1999,1,1), ld(1999,2,1), 2, true);
         return fixtureResults.addResult(this, project.getReference(), project);
     }
 
@@ -66,5 +69,7 @@ public abstract class ProjectAbstract extends EstatioFixtureScript {
   
   @Inject 
   protected ProjectRoles projectRoles;
-
+  
+  @Inject
+  protected BusinessCases businesscases;
 }

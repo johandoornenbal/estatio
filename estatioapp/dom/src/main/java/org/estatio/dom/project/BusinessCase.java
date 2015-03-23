@@ -1,5 +1,6 @@
 package org.estatio.dom.project;
 
+import javax.inject.Inject;
 import javax.jdo.annotations.Column;
 import javax.jdo.annotations.DatastoreIdentity;
 import javax.jdo.annotations.IdGeneratorStrategy;
@@ -157,21 +158,13 @@ public class BusinessCase extends EstatioDomainObject<BusinessCase> {
 			final String businessCaseDescription,
 			@ParameterLayout(named = "Next review date")
 			final LocalDate reviewDate){
-		// Create businesscase instance		
-		BusinessCase businesscase = getContainer().newTransientInstance(BusinessCase.class);
-		// Set values
-		businesscase.setBusinessCaseDescription(businessCaseDescription);
-		businesscase.setDate(this.getDate());
+		
 		new LocalDate();
 		final LocalDate now = LocalDate.now();
-		businesscase.setLastUpdated(now);
-		businesscase.setNextReviewDate(reviewDate);
-		businesscase.setProject(this.getProject());
-		businesscase.setBusinessCaseVersion(this.getBusinessCaseVersion() + 1);
-		businesscase.setIsActiveVersion(true);
-		// Persist it
-		persist(businesscase);
-		// Set old version active to false and persist it
+		
+		BusinessCase businesscase = businesscases.newBusinessCase(this.project, businessCaseDescription, reviewDate, this.date, now, this.getBusinessCaseVersion() + 1, true);
+		
+		// Set old version isActive property to false and persist it
 		this.setIsActiveVersion(false);
 		persistIfNotAlready(this);
 		
@@ -211,5 +204,8 @@ public class BusinessCase extends EstatioDomainObject<BusinessCase> {
 	}
 	
 	// //////////////////////////////////////
+	
+	@Inject
+	BusinessCases businesscases;
 	
 }

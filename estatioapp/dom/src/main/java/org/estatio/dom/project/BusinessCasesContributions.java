@@ -36,7 +36,7 @@ public class BusinessCasesContributions extends EstatioDomainService<BusinessCas
 		
 		new LocalDate();
 		final LocalDate now = LocalDate.now();
-		return businesscases.newBusinessCase(project, businessCaseDescription, reviewDate, now, 1, true);
+		return businesscases.newBusinessCase(project, businessCaseDescription, reviewDate, now, null, 1, true);
 	}
 	
 	public boolean hideNewBusinessCase(final Project project, final String businessCaseDescription, final LocalDate reviewDate){

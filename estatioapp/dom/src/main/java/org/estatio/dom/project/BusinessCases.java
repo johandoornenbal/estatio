@@ -21,6 +21,7 @@ public class BusinessCases extends EstatioDomainService<BusinessCase> {
 			final String businessCaseDescription,
 			final LocalDate reviewDate,
 			final LocalDate date,
+			final LocalDate lastUpdated,
 			final Integer businessCaseVersion,
 			final boolean isActiveVersion
 			){
@@ -31,6 +32,7 @@ public class BusinessCases extends EstatioDomainService<BusinessCase> {
 		businesscase.setBusinessCaseDescription(businessCaseDescription);
 		businesscase.setDate(date);
 		businesscase.setNextReviewDate(reviewDate);
+		businesscase.setLastUpdated(lastUpdated);
 		businesscase.setProject(project);
 		businesscase.setBusinessCaseVersion(businessCaseVersion);
 		businesscase.setIsActiveVersion(isActiveVersion);
