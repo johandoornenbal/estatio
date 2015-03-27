@@ -36,7 +36,7 @@ public class BusinessCasesContributions extends EstatioDomainService<BusinessCas
 		
 		new LocalDate();
 		final LocalDate now = LocalDate.now();
-		return businesscases.newBusinessCase(project, businessCaseDescription, reviewDate, now, null, 1, true);
+		return businesscases.newBusinessCase(project, businessCaseDescription, reviewDate, now, null, 1);
 	}
 	
 	public boolean hideNewBusinessCase(final Project project, final String businessCaseDescription, final LocalDate reviewDate){
@@ -66,38 +66,7 @@ public class BusinessCasesContributions extends EstatioDomainService<BusinessCas
 	@Action(semantics=SemanticsOf.SAFE)
 	@ActionLayout(contributed=Contributed.AS_ASSOCIATION)
 	public BusinessCase businesCase(final Project project){
-		return businesscases.FindActiveBusinessCaseOnProject(project, true);
-	}
-	
-	
-	@Action(semantics=SemanticsOf.SAFE)
-	@ActionLayout(contributed=Contributed.AS_ACTION)
-	public BusinessCase previousVersion(final BusinessCase businessCase){
-		return businesscases.previousVersion(businessCase);
-	}
-	
-	public String disablePreviousVersion(final BusinessCase businessCase){
-		
-		if(businessCase.getBusinessCaseVersion() > 1){
-			return null;
-		}
-		
-		return "There is no previous";
-	}
-	
-	@Action(semantics=SemanticsOf.SAFE)
-	@ActionLayout(contributed=Contributed.AS_ACTION)
-	public BusinessCase nextVersion(final BusinessCase businessCase){
-		return businesscases.nextVersion(businessCase);
-	}
-
-	public String disableNextVersion(final BusinessCase businessCase){
-		
-		if(businessCase.getIsActiveVersion()){
-			return "There is no next";
-		}
-		
-		return null;
+		return businesscases.findActiveBusinessCaseOnProject(project);
 	}
 	
 	@Inject 

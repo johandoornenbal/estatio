@@ -28,12 +28,22 @@ import org.estatio.dom.utils.StringUtils;
 
 public enum ProgramRoleType implements TitledEnum {
 
-    PROGRAM_OWNER,
-    PROGRAM_BOARDMEMBER;
+    PROGRAM_OWNER(false),
+    PROGRAM_BOARDMEMBER(true);
 
     public String title() {
         return StringUtils.enumTitle(this.toString());
     }
+    
+    private boolean allowMultilple;
+    
+    private ProgramRoleType(boolean allowMultiple) {
+		this.allowMultilple = allowMultiple;
+	}
+    
+    public boolean isAllowMultilple() {
+		return allowMultilple;
+	}
     
     @Programmatic
     public Predicate<? super ProgramRole> matchingRole() {

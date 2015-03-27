@@ -91,7 +91,8 @@ public class BusinessCasesTest extends EstatioIntegrationTest {
         public void valuesSet() throws Exception {
     		//then 
     		assertThat(businesscases.businesCase(pr1), is(bc));
-    		assertThat(bc.getIsActiveVersion(), is(true));
+    		assertNull(bc.getNext());
+    		assertNull(bc.getPrevious());
     		assertThat(bc.getDate(), is(NOW));
     		assertThat(bc.getBusinessCaseVersion(), is(1));
     		assertThat(bc.getNextReviewDate(), is(REVIEWDATE));
@@ -100,8 +101,6 @@ public class BusinessCasesTest extends EstatioIntegrationTest {
     		assertThat(bc.getProject(), is(pr1));
     		assertThat(bc.hideUpdateBusinessCase(BUSINESSCASE_DESCRIPTION, REVIEWDATE), is(false));
     		assertNull(bc.validateUpdateBusinessCase(BUSINESSCASE_DESCRIPTION, REVIEWDATE));
-    		assertThat(businesscases.disableNextVersion(bc), is("There is no next"));
-    		assertThat(businesscases.disablePreviousVersion(bc), is("There is no previous"));
     		assertThat(businesscases.hideNewBusinessCase(pr1, BUSINESSCASE_DESCRIPTION, REVIEWDATE), is(true));
     	}
 
@@ -164,8 +163,10 @@ public class BusinessCasesTest extends EstatioIntegrationTest {
         public void valuesSet() throws Exception {
     		//then 
     		assertThat(businesscases.businesCase(pr1), is(bc_upd));
-    		assertThat(bc_upd.getIsActiveVersion(), is(true));
-    		assertThat(bc.getIsActiveVersion(), is(false));
+    		assertNull(bc_upd.getNext());
+    		assertThat(bc_upd.getPrevious(), is(bc));
+    		assertThat(bc.getNext(), is(bc_upd));
+    		assertNull(bc.getPrevious());
     		assertThat(bc_upd.getDate(), is(NOW));
     		assertThat(bc.getDate(), is(NOW));
     		assertThat(bc_upd.getBusinessCaseVersion(), is(2));
@@ -182,10 +183,6 @@ public class BusinessCasesTest extends EstatioIntegrationTest {
     		assertThat(bc.hideUpdateBusinessCase(BUSINESSCASE_DESCRIPTION_UPDATED, REVIEWDATE), is(true));
     		assertNull(bc_upd.validateUpdateBusinessCase(BUSINESSCASE_DESCRIPTION_UPDATED, REVIEWDATE));
     		assertThat(bc.validateUpdateBusinessCase(BUSINESSCASE_DESCRIPTION_UPDATED, REVIEWDATE), is("This is no active version of the business case and cannot be updated"));
-    		assertThat(businesscases.disableNextVersion(bc_upd), is("There is no next"));
-    		assertNull(businesscases.disableNextVersion(bc));
-    		assertNull(businesscases.disablePreviousVersion(bc_upd));
-    		assertThat(businesscases.disablePreviousVersion(bc), is("There is no previous"));
     		assertThat(businesscases.hideNewBusinessCase(pr1, BUSINESSCASE_DESCRIPTION, REVIEWDATE), is(true));
     	}
 

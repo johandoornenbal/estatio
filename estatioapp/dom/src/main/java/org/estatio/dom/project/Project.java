@@ -37,6 +37,8 @@ import javax.jdo.annotations.VersionStrategy;
 import org.apache.isis.applib.annotation.CollectionLayout;
 import org.apache.isis.applib.annotation.DomainObject;
 import org.apache.isis.applib.annotation.Editing;
+import org.apache.isis.applib.annotation.Optionality;
+import org.apache.isis.applib.annotation.Parameter;
 import org.apache.isis.applib.annotation.ParameterLayout;
 import org.apache.isis.applib.annotation.Property;
 import org.apache.isis.applib.annotation.PropertyLayout;
@@ -44,6 +46,7 @@ import org.apache.isis.applib.annotation.RenderType;
 import org.apache.isis.applib.annotation.Title;
 import org.apache.isis.applib.annotation.Where;
 import org.estatio.dom.EstatioDomainObject;
+import org.estatio.dom.JdoColumnScale;
 import org.estatio.dom.RegexValidation;
 import org.estatio.dom.WithReferenceUnique;
 import org.estatio.dom.currency.Currency;
@@ -53,120 +56,112 @@ import org.joda.time.LocalDate;
 @DatastoreIdentity(strategy = IdGeneratorStrategy.NATIVE, column = "id")
 @Version(strategy = VersionStrategy.VERSION_NUMBER, column = "version")
 @Queries({
-        @Query(
-                name = "findByReference", language = "JDOQL",
-                value = "SELECT " +
-                        "FROM org.estatio.dom.project.Project " +
-                        "WHERE reference == :reference "),
-        @Query(
-                name = "matchByReferenceOrName", language = "JDOQL",
-                value = "SELECT " +
-                        "FROM org.estatio.dom.project.Project " +
-                        "WHERE reference.matches(:matcher) || name.matches(:matcher) "),
-        @Query(
-                name = "findByProgram", language = "JDOQL",
-                value = "SELECT " +
-                        "FROM org.estatio.dom.project.Project " +
-                        "WHERE program == :program ")                        
-})
-@DomainObject(editing=Editing.DISABLED, autoCompleteRepository=Projects.class, autoCompleteAction = "autoComplete")
-public class Project 
-		extends EstatioDomainObject<Project>
-		implements WithReferenceUnique {
+		@Query(name = "findByReference", language = "JDOQL", value = "SELECT "
+				+ "FROM org.estatio.dom.project.Project "
+				+ "WHERE reference == :reference "),
+		@Query(name = "matchByReferenceOrName", language = "JDOQL", value = "SELECT "
+				+ "FROM org.estatio.dom.project.Project "
+				+ "WHERE reference.matches(:matcher) || name.matches(:matcher) "),
+		@Query(name = "findByProgram", language = "JDOQL", value = "SELECT "
+				+ "FROM org.estatio.dom.project.Project "
+				+ "WHERE program == :program ") })
+@DomainObject(editing = Editing.DISABLED, autoCompleteRepository = Projects.class, autoCompleteAction = "autoComplete")
+public class Project extends EstatioDomainObject<Project> implements
+		WithReferenceUnique {
 
-    public Project() {
-        super("reference, name, startDate");
-    }
+	public Project() {
+		super("reference, name, startDate");
+	}
 
-    // //////////////////////////////////////
+	// //////////////////////////////////////
 
-    private String reference;
+	private String reference;
 
-    @Column(allowsNull = "false")
-    @Property(regexPattern = RegexValidation.REFERENCE)
-    @PropertyLayout(describedAs = "Unique reference code for this project")
-    public String getReference() {
-        return reference;
-    }
+	@Column(allowsNull = "false")
+	@Property(regexPattern = RegexValidation.REFERENCE)
+	@PropertyLayout(describedAs = "Unique reference code for this project")
+	public String getReference() {
+		return reference;
+	}
 
-    public void setReference(String reference) {
-        this.reference = reference;
-    }
+	public void setReference(String reference) {
+		this.reference = reference;
+	}
 
-    // //////////////////////////////////////
+	// //////////////////////////////////////
 
-    private String name;
+	private String name;
 
-    @Title
-    @Column(allowsNull = "false")
-    public String getName() {
-        return name;
-    }
+	@Title
+	@Column(allowsNull = "false")
+	public String getName() {
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    // //////////////////////////////////////
+	// //////////////////////////////////////
 
-    private LocalDate startDate;
+	private LocalDate startDate;
 
-    @Column(allowsNull = "true")
-    public LocalDate getStartDate() {
-        return startDate;
-    }
+	@Column(allowsNull = "true")
+	public LocalDate getStartDate() {
+		return startDate;
+	}
 
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
+	public void setStartDate(LocalDate startDate) {
+		this.startDate = startDate;
+	}
 
-    // //////////////////////////////////////
+	// //////////////////////////////////////
 
-    private LocalDate endDate;
+	private LocalDate endDate;
 
-    @Column(allowsNull = "true")
-    @Persistent
-    public LocalDate getEndDate() {
-        return endDate;
-    }
+	@Column(allowsNull = "true")
+	@Persistent
+	public LocalDate getEndDate() {
+		return endDate;
+	}
 
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
+	public void setEndDate(LocalDate endDate) {
+		this.endDate = endDate;
+	}
 
-    // //////////////////////////////////////
+	// //////////////////////////////////////
 
-    private Program program;
+	private Program program;
 
-    @Column(allowsNull = "false")
-    @Property(hidden=Where.REFERENCES_PARENT)
-    public Program getProgram() {
-        return program;
-    }
+	@Column(name = "programId", allowsNull = "false")
+	@Property(hidden = Where.REFERENCES_PARENT)
+	public Program getProgram() {
+		return program;
+	}
 
-    public void setProgram(Program program) {
-        this.program = program;
-    }
-    
-    // //////////////////////////////////////
+	public void setProgram(Program program) {
+		this.program = program;
+	}
 
-    private Currency currency;
+	// //////////////////////////////////////
 
-    @Column(allowsNull = "true")
-    public Currency getCurrency() {
-        return currency;
-    }
+	private Currency currency;
 
-    public void setCurrency(final Currency currency) {
-        this.currency = currency;
-    }
+	@Column(allowsNull = "true")
+	public Currency getCurrency() {
+		return currency;
+	}
 
-    // //////////////////////////////////////
-    
-    private BigDecimal estimatedCost;
-    
-    @Column(allowsNull = "true")
-    public BigDecimal getEstimatedCost() {
+	public void setCurrency(final Currency currency) {
+		this.currency = currency;
+	}
+
+	// //////////////////////////////////////
+
+	private BigDecimal estimatedCost;
+
+	@Column(allowsNull = "true", scale = JdoColumnScale.MONEY)
+	public BigDecimal getEstimatedCost() {
 		return estimatedCost;
 	}
 
@@ -174,10 +169,10 @@ public class Project
 		this.estimatedCost = estimatedCost;
 	}
 
-    // //////////////////////////////////////
-	
+	// //////////////////////////////////////
+
 	private ProjectPhase projectPhase;
-	
+
 	@Column(allowsNull = "true")
 	public ProjectPhase getProjectPhase() {
 		return projectPhase;
@@ -186,29 +181,110 @@ public class Project
 	public void setProjectPhase(ProjectPhase projectPhase) {
 		this.projectPhase = projectPhase;
 	}
-  
 
-    // TODO: validatie op leeg zijn startdatum enzo
-    public Project postponeOneWeek(@ParameterLayout(named="Reason") String reason) {
-        setStartDate(getStartDate().plusWeeks(1));
-        return this;
-    }
-    
-    // //////////////////////////////////////
+//	public Project postponeOneWeek(
+//			@ParameterLayout(named = "Reason") String reason) {
+//		setStartDate(getStartDate().plusWeeks(1));
+//		return this;
+//	}
 
-    @javax.jdo.annotations.Persistent(mappedBy = "project")
-    private SortedSet<ProjectRole> roles = new TreeSet<ProjectRole>();
+	// //////////////////////////////////////
+	
+    //TODO: decouple sorted set [momentarily needed by code in  ProjectRole getPredecessor() etc.
 
-    @CollectionLayout(render=RenderType.EAGERLY, hidden=Where.EVERYWHERE)
-    public SortedSet<ProjectRole> getRoles() {
-        return roles;
-    }
+	@javax.jdo.annotations.Persistent(mappedBy = "project")
+	private SortedSet<ProjectRole> roles = new TreeSet<ProjectRole>();
 
-//    public void setRoles(final SortedSet<ProjectRole> roles) {
-//        this.roles = roles;
-//    }
+	@CollectionLayout(render = RenderType.EAGERLY, hidden = Where.EVERYWHERE)
+	public SortedSet<ProjectRole> getRoles() {
+		return roles;
+	}
 
+	// public void setRoles(final SortedSet<ProjectRole> roles) {
+	// this.roles = roles;
+	// }
+	
+	// //////////////////////////////////////
+	
+	public Project updateDates(
+			@Parameter(optionality=Optionality.OPTIONAL)
+			@ParameterLayout(named = "Start date")
+			final LocalDate startDate,
+			@Parameter(optionality=Optionality.OPTIONAL)
+			@ParameterLayout(named = "End date")
+			final LocalDate endDate
+			){
+		
+		this.setStartDate(startDate);
+		this.setEndDate(endDate);
+		return this;
+	}
+	
+	public LocalDate default0UpdateDates(){
+		return this.getStartDate();
+	}
+	
+	public LocalDate default1UpdateDates(){
+		return this.getEndDate();
+	}
+	
+	public String validateUpdateDates(final LocalDate startDate, final LocalDate endDate){
+		
+		if (startDate.isAfter(endDate)) {
+			return "Start date cannot be later than End date";
+		}
+		
+		return null;
+	}	
+	
+	// //////////////////////////////////////
+	
+	public Project updateCost(
+			@Parameter(optionality=Optionality.OPTIONAL)
+			@ParameterLayout(named = "Currency")
+			final Currency currency,
+			@Parameter(optionality=Optionality.OPTIONAL)
+			@ParameterLayout(named = "Estimated cost")
+			final BigDecimal estimatedCost
+			){
+		
+		this.setCurrency(currency);;
+		this.setEstimatedCost(estimatedCost);
+		return this;
+	}
+	
+	public Currency default0UpdateCost(){
+		return this.getCurrency();
+	}
+	
+	public BigDecimal default1UpdateCost(){
+		return this.getEstimatedCost();
+	}
+	
+	// //////////////////////////////////////
+	
+	public Project changeProject(
+			@ParameterLayout(named = "Project name")
+			final String name,
+			@ParameterLayout(named = "Project phase")
+			final ProjectPhase projectPhase){
+		this.setName(name);
+		this.setProjectPhase(projectPhase);
+		return this;
+	}
+	
+	public String default0ChangeProject(){
+		return this.getName();
+	}
+	
+	public ProjectPhase default1ChangeProject(){
+		return this.getProjectPhase();
+	}
+	
+	
+	// //////////////////////////////////////
+	
 	@Inject
 	public ProjectRoles projectRoles;
-    
+
 }

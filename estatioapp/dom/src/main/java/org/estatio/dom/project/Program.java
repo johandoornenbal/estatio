@@ -36,6 +36,7 @@ import javax.jdo.annotations.VersionStrategy;
 import org.apache.isis.applib.annotation.CollectionLayout;
 import org.apache.isis.applib.annotation.DomainObject;
 import org.apache.isis.applib.annotation.Editing;
+import org.apache.isis.applib.annotation.ParameterLayout;
 //import org.apache.isis.applib.annotation.Property;
 import org.apache.isis.applib.annotation.PropertyLayout;
 import org.apache.isis.applib.annotation.RenderType;
@@ -133,21 +134,7 @@ public class Program
     }
     
     // //////////////////////////////////////
-    
-//    @javax.jdo.annotations.Persistent(mappedBy = "program")
-//    private SortedSet<Project> projects = new TreeSet<Project>();
-//
-//    @CollectionLayout(render=RenderType.EAGERLY)
-//    public SortedSet<Project> getProjects() {
-//        return projects;
-//    }
-//
-//    public void setProjects(final SortedSet<Project> projects) {
-//        this.projects = projects;
-//    }    
-
-    // //////////////////////////////////////
-    
+        
     //TODO: decouple sorted set [momentarily needed by code in  ProgramRole getPredecessor() etc.
 
     @javax.jdo.annotations.Persistent(mappedBy = "program")
@@ -162,7 +149,31 @@ public class Program
 //        this.roles = roles;
 //    }
     
-
+    // //////////////////////////////////////
+    
+    public Program changeProgram(
+    		@ParameterLayout(named = "Program name")
+    		final String name,
+    		@ParameterLayout(multiLine = 5, named = "Program goal")
+    		final String programGoal){
+    
+    	this.setName(name);
+    	this.setProgramGoal(programGoal);
+    	
+    	return this;
+    }
+    
+    public String default0ChangeProgram() {
+    	return this.getName();
+    }
+    
+    public String default1ChangeProgram() {
+    	return this.getProgramGoal();
+    }
+    
+    
+    // //////////////////////////////////////
+    
     @Inject
 	public ProgramRoles programRoles;
 

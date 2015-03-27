@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import org.estatio.dom.currency.Currency;
 import org.estatio.dom.party.Parties;
 import org.estatio.dom.party.Party;
+import org.estatio.dom.project.BusinessCase;
 import org.estatio.dom.project.BusinessCases;
 import org.estatio.dom.project.Program;
 import org.estatio.dom.project.Programs;
@@ -58,8 +59,8 @@ public abstract class ProjectAbstract extends EstatioFixtureScript {
         Project project = projects.newProject(reference, name, startDate, endDate, currency, estimatedCost, projectPhase, program);
         projectRoles.createRole(project, ProjectRoleType.PROJECT_EXECUTIVE, executive, ld(1999, 1, 1), ld(2000, 1, 1));
         projectRoles.createRole(project, ProjectRoleType.PROJECT_MANAGER, manager, ld(1999, 7, 1), ld(2000, 1, 1));
-        businesscases.newBusinessCase(project, "Business case description for " + project.getName(), ld(1999,7,1), ld(1999,1,1), null, 1, false);
-        businesscases.newBusinessCase(project, "Updated business case description for " + project.getName(), ld(1999,8,1), ld(1999,1,1), ld(1999,2,1), 2, true);
+        BusinessCase updatedCase = businesscases.newBusinessCase(project, "Updated business case description for " + project.getName(), ld(1999,8,1), ld(1999,1,1), ld(1999,2,1), 2);
+        businesscases.newBusinessCaseForFixtures(project, "Business case description for " + project.getName(), ld(1999,7,1), ld(1999,1,1), null, 1, updatedCase);
         return fixtureResults.addResult(this, project.getReference(), project);
     }
 

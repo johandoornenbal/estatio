@@ -6,6 +6,7 @@ import javax.jdo.annotations.DatastoreIdentity;
 import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.PersistenceCapable;
+import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.Queries;
 import javax.jdo.annotations.Query;
 import javax.jdo.annotations.Version;
@@ -15,10 +16,9 @@ import org.apache.isis.applib.annotation.Action;
 import org.apache.isis.applib.annotation.DomainObject;
 import org.apache.isis.applib.annotation.Editing;
 import org.apache.isis.applib.annotation.ParameterLayout;
-import org.apache.isis.applib.annotation.Property;
 import org.apache.isis.applib.annotation.PropertyLayout;
 import org.apache.isis.applib.annotation.SemanticsOf;
-import org.apache.isis.applib.annotation.Where;
+import org.estatio.dom.Chained;
 import org.estatio.dom.EstatioDomainObject;
 import org.joda.time.LocalDate;
 
@@ -40,10 +40,15 @@ import org.joda.time.LocalDate;
             name = "findByProjectAndActiveVersion", language = "JDOQL",
             value = "SELECT " +
                     "FROM org.estatio.dom.project.BusinessCase " +
-                    "WHERE project == :project && isActiveVersion == :isActiveVersion")                       
+                    "WHERE project == :project && isActiveVersion == :isActiveVersion"),
+    @Query(
+            name = "findActiveBusinessCaseOnProject", language = "JDOQL",
+            value = "SELECT " +
+                    "FROM org.estatio.dom.project.BusinessCase " +
+                    "WHERE project == :project && next == null")                      
 })
 @DomainObject(editing=Editing.DISABLED)
-public class BusinessCase extends EstatioDomainObject<BusinessCase> {
+public class BusinessCase extends EstatioDomainObject<BusinessCase> implements Chained<BusinessCase>{
 
 	public BusinessCase() {
 		super("project, date, lastUpdated desc nullsLast, businessCaseDescription");
@@ -70,7 +75,7 @@ public class BusinessCase extends EstatioDomainObject<BusinessCase> {
 
 	private Project project;
 	
-	@Column(allowsNull = "false")
+	@Column(name= "projectId", allowsNull = "false")
 	public Project getProject() {
 		return project;
 	}
@@ -133,22 +138,6 @@ public class BusinessCase extends EstatioDomainObject<BusinessCase> {
 	
 	// //////////////////////////////////////
 	
-	private boolean isActiveVersion;
-	
-	@Column(allowsNull = "false")
-	@Property(hidden=Where.EVERYWHERE)
-	public boolean getIsActiveVersion() {
-		return isActiveVersion;
-	}
-
-	public void setIsActiveVersion(boolean isActiveVersion) {
-		this.isActiveVersion = isActiveVersion;
-	}
-
-	
-	
-	// //////////////////////////////////////
-	
 	@Action(semantics=SemanticsOf.NON_IDEMPOTENT)
 	public BusinessCase updateBusinessCase(
 			@ParameterLayout(
@@ -162,13 +151,10 @@ public class BusinessCase extends EstatioDomainObject<BusinessCase> {
 		new LocalDate();
 		final LocalDate now = LocalDate.now();
 		
-		BusinessCase businesscase = businesscases.newBusinessCase(this.project, businessCaseDescription, reviewDate, this.date, now, this.getBusinessCaseVersion() + 1, true);
+		BusinessCase nextBusinesscase = businesscases.newBusinessCase(this.getProject(), businessCaseDescription, reviewDate, this.date, now, this.getBusinessCaseVersion() + 1);
+		this.setNext(nextBusinesscase);
 		
-		// Set old version isActive property to false and persist it
-		this.setIsActiveVersion(false);
-		persistIfNotAlready(this);
-		
-		return businesscase;
+		return nextBusinesscase;
 	}
 	
 	public String default0UpdateBusinessCase(){
@@ -181,7 +167,7 @@ public class BusinessCase extends EstatioDomainObject<BusinessCase> {
 	
 	public boolean hideUpdateBusinessCase(final String businessCaseDescription, final LocalDate reviewDate) {
 		
-		if (this.getIsActiveVersion()) {
+		if (this.getNext()==null) {
 			return false;
 		}
 		
@@ -190,7 +176,7 @@ public class BusinessCase extends EstatioDomainObject<BusinessCase> {
 	
 	public String validateUpdateBusinessCase(final String businessCaseDescription, final LocalDate reviewDate) {
 		
-		if (!this.getIsActiveVersion()) {
+		if (this.getNext()!=null) {
 			return "This is no active version of the business case and cannot be updated";
 		}
 		
@@ -205,7 +191,32 @@ public class BusinessCase extends EstatioDomainObject<BusinessCase> {
 	
 	// //////////////////////////////////////
 	
+	@Column(name="nextBusinessCaseId")
+	private BusinessCase next;
+	
+	@Override
+	public BusinessCase getNext() {
+		return next;
+	}
+	
+	public void setNext(BusinessCase next) {
+		this.next = next;
+	}
+	
+	// //////////////////////////////////////
+	
+	@Column(name="previousBusinessCaseId")
+	@Persistent(mappedBy="next")
+	private BusinessCase previous;
+	
+	@Override
+	public BusinessCase getPrevious() {
+		return previous;
+	}
+	
+	// //////////////////////////////////////
+	
 	@Inject
 	BusinessCases businesscases;
-	
+
 }

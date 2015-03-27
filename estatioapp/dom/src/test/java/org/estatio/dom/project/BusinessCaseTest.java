@@ -12,6 +12,7 @@ public class BusinessCaseTest {
             final BusinessCase pojo = new BusinessCase();
             newPojoTester()
                     .withFixture(pojos(Project.class, ProjectForTesting.class))
+                    .withFixture(pojos(BusinessCase.class, BusinessCaseForTesting.class))
                     .exercise(pojo);
         }
 

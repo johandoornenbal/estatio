@@ -3,7 +3,7 @@
     {
       "span": 4,
       "memberGroups": {
-        "General": {
+        "Project": {
           "members": {
             "id": {
               "hidden": {},
@@ -22,8 +22,13 @@
                 "value": 25
               }
             },
-            "property": {},
-            "responsible": {},
+            "projectPhase": {
+            	"actions" : {
+            		"changeProject" : {}
+            	}
+            },
+            "businessCase": {},
+            "program": {},
             "versionSequence": {
               "hidden": {},
               "disabled": {},
@@ -33,6 +38,7 @@
             }
           }
         },
+        "General" : {},
         "Dates": {
           "members": {
             "startDate": {
@@ -43,10 +49,30 @@
             "endDate": {
               "typicalLength": {
                 "value": 12
-              }
+              },
+             	"actions" : {
+            		"updateDates" : {}
+            	}
             }
           }
-        }
+        },
+         "Cost": {
+          "members": {
+            "currency": {
+              "typicalLength": {
+                "value": 12
+              }
+            },
+            "estimatedCost": {
+              "typicalLength": {
+                "value": 12
+              },
+             	"actions" : {
+            		"updateCost" : {}
+            	}             
+            }
+          }
+        }       
       }
     },
     {
@@ -59,7 +85,13 @@
     },
     {
       "span": 8,
-      "collections": {}
+      "collections": {
+      	"roles" : {
+      		"actions" : {
+      			"newProjectRole" : {}
+      		}
+      	}
+      }
     }
   ],
   "actions": {

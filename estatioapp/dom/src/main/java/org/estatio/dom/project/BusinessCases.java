@@ -22,11 +22,10 @@ public class BusinessCases extends EstatioDomainService<BusinessCase> {
 			final LocalDate reviewDate,
 			final LocalDate date,
 			final LocalDate lastUpdated,
-			final Integer businessCaseVersion,
-			final boolean isActiveVersion
+			final Integer businessCaseVersion
 			){
 		// Create businesscase instance
-		BusinessCase businesscase = getContainer().newTransientInstance(BusinessCase.class);
+		BusinessCase businesscase = newTransientInstance(BusinessCase.class);
 		
 		// Set values
 		businesscase.setBusinessCaseDescription(businessCaseDescription);
@@ -35,9 +34,35 @@ public class BusinessCases extends EstatioDomainService<BusinessCase> {
 		businesscase.setLastUpdated(lastUpdated);
 		businesscase.setProject(project);
 		businesscase.setBusinessCaseVersion(businessCaseVersion);
-		businesscase.setIsActiveVersion(isActiveVersion);
 		// Persist it
-		persist(businesscase);
+		persistIfNotAlready(businesscase);
+		
+		return businesscase;
+	}
+	
+	@Programmatic
+	public BusinessCase newBusinessCaseForFixtures(
+			final Project project,
+			final String businessCaseDescription,
+			final LocalDate reviewDate,
+			final LocalDate date,
+			final LocalDate lastUpdated,
+			final Integer businessCaseVersion,
+			final BusinessCase next
+			){
+		// Create businesscase instance
+		BusinessCase businesscase = newTransientInstance(BusinessCase.class);
+		
+		// Set values
+		businesscase.setBusinessCaseDescription(businessCaseDescription);
+		businesscase.setDate(date);
+		businesscase.setNextReviewDate(reviewDate);
+		businesscase.setLastUpdated(lastUpdated);
+		businesscase.setProject(project);
+		businesscase.setBusinessCaseVersion(businessCaseVersion);
+		businesscase.setNext(next);
+		// Persist it
+		persistIfNotAlready(businesscase);
 		
 		return businesscase;
 	}
@@ -48,8 +73,8 @@ public class BusinessCases extends EstatioDomainService<BusinessCase> {
 	}
 	
 	@Programmatic
-	public BusinessCase FindActiveBusinessCaseOnProject(final Project project, final boolean isActiveVersion){
-		return uniqueMatch("findByProjectAndActiveVersion", "project", project, "isActiveVersion", isActiveVersion);
+	public BusinessCase findActiveBusinessCaseOnProject(final Project project){
+		return uniqueMatch("findActiveBusinessCaseOnProject", "project", project);
 	}
 	
 	@Programmatic

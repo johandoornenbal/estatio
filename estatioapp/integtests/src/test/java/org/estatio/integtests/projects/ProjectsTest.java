@@ -19,8 +19,7 @@
 package org.estatio.integtests.projects;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 import java.util.List;
 
@@ -34,6 +33,7 @@ import org.estatio.fixture.party.OrganisationForTopModel;
 import org.estatio.fixture.project.ProjectsForGra;
 import org.estatio.fixture.project.ProjectsForKal;
 import org.estatio.integtests.EstatioIntegrationTest;
+import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -99,6 +99,28 @@ public class ProjectsTest extends EstatioIntegrationTest {
             assertNotNull(projs);
             assertThat(projs.size(), is(3));
         }
+    }
+    
+    public static class updateDateOfProject extends ProjectsTest {
+    	
+    	@Test
+    	public void rightDates() throws Exception {
+    		// when
+            Project project = projects.allProjects().get(0);
+            
+            //then
+            assertNull(project.validateUpdateDates(new LocalDate(2000,01,01), new LocalDate(2000,01,01)));
+    	}
+    	
+    	@Test
+    	public void wrongDates() throws Exception {
+    		// when
+            Project project = projects.allProjects().get(0);
+            
+            //then
+            assertThat(project.validateUpdateDates(new LocalDate(2000,01,02), new LocalDate(2000,01,01)), is("Start date cannot be later than End date"));
+    	}
+    	
     }
 
 }
