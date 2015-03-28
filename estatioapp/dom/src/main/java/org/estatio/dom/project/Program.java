@@ -36,6 +36,7 @@ import javax.jdo.annotations.VersionStrategy;
 import org.apache.isis.applib.annotation.CollectionLayout;
 import org.apache.isis.applib.annotation.DomainObject;
 import org.apache.isis.applib.annotation.Editing;
+import org.apache.isis.applib.annotation.MemberOrder;
 import org.apache.isis.applib.annotation.ParameterLayout;
 //import org.apache.isis.applib.annotation.Property;
 import org.apache.isis.applib.annotation.PropertyLayout;
@@ -83,6 +84,7 @@ public class Program
     @Column(allowsNull = "false")
     @org.apache.isis.applib.annotation.Property(regexPattern = RegexValidation.REFERENCE)
     @PropertyLayout(describedAs = "Unique reference code for this program")
+    @MemberOrder(sequence="1")
     public String getReference() {
         return reference;
     }
@@ -97,6 +99,7 @@ public class Program
 
     @Title
     @Column(allowsNull = "false")
+    @MemberOrder(sequence="2")
     public String getName() {
         return name;
     }
@@ -111,6 +114,7 @@ public class Program
 
     @Column(allowsNull = "false")
     @PropertyLayout(multiLine = 5)
+    @MemberOrder(sequence="3")
     public String getProgramGoal() {
         return programGoal;
     }
@@ -125,6 +129,7 @@ public class Program
 
     @Column(allowsNull = "true")
     @Persistent
+    @MemberOrder(sequence="4")
     public Property getProperty() {
         return property;
     }

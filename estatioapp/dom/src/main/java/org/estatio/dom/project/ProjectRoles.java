@@ -33,6 +33,8 @@ import org.estatio.dom.EstatioDomainService;
 import org.estatio.dom.party.Party;
 import org.joda.time.LocalDate;
 
+import com.google.common.eventbus.Subscribe;
+
 @DomainService(nature=NatureOfService.DOMAIN, repositoryFor = ProjectRole.class)
 @DomainServiceLayout(menuOrder="10")
 public class ProjectRoles extends EstatioDomainService<ProjectRole> {
@@ -99,6 +101,8 @@ public class ProjectRoles extends EstatioDomainService<ProjectRole> {
                 "type", type);
     }
     
+    // //////////////////////////////////////
+    
     @Programmatic
     public ProjectRole createRole(
     		final Project project,
@@ -117,9 +121,59 @@ public class ProjectRoles extends EstatioDomainService<ProjectRole> {
 
         return role;
     }
+    
+    // //////////////////////////////////////
 
 	@Programmatic
     public List<ProjectRole> findByProject(final Project project) {
         return allMatches("findByProject", "project", project);
     }
+	
+	// //////////////////////////////////////
+	
+	@Programmatic
+    public List<ProjectRole> findByParty(final Party party) {
+        return allMatches("findByParty", "party", party);
+    }
+	
+	// //////////////////////////////////////
+	
+    @Subscribe
+    @Programmatic
+    public void on(final Party.RemoveEvent ev) {
+        Party sourceParty = (Party) ev.getSource();
+        Party replacementParty = ev.getReplacement();
+
+        switch (ev.getEventPhase()) {
+        case VALIDATE:
+            final List<ProjectRole> projectRoles = findByParty(sourceParty);
+
+            if (projectRoles.size() > 0 && replacementParty == null) {
+                ev.invalidate("Party is being used in a project role: remove roles or provide a replacement");
+            }
+
+            putProjectRole(ev, projectRoles);
+            break;
+        case EXECUTING:
+            for (ProjectRole projectRole : getProjectRoles(ev)) {
+                projectRole.setParty(replacementParty);
+            }
+            break;
+        default:
+            break;
+        }
+    }
+    
+    // //////////////////////////////////////
+
+    private static final String KEY = ProjectRole.class.getName() + ".projectRoles";
+
+    private static void putProjectRole(Party.RemoveEvent ev, List<ProjectRole> projectRoles) {
+        ev.put(KEY, projectRoles);
+    }
+
+    private static List<ProjectRole> getProjectRoles(Party.RemoveEvent ev) {
+        return (List<ProjectRole>) ev.get(KEY);
+    }
+    
 }
