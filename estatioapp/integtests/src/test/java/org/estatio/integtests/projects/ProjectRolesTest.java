@@ -21,14 +21,18 @@ package org.estatio.integtests.projects;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 
 import javax.inject.Inject;
 
 import org.apache.isis.applib.fixturescripts.FixtureScript;
+import org.apache.isis.applib.services.eventbus.AbstractInteractionEvent.Phase;
+import org.apache.isis.applib.services.wrapper.InvalidException;
 import org.estatio.dom.party.Parties;
 import org.estatio.dom.party.Party;
+import org.estatio.dom.party.Party.RemoveEvent;
 import org.estatio.dom.project.Project;
 import org.estatio.dom.project.ProjectRole;
 import org.estatio.dom.project.ProjectRoleType;
@@ -37,6 +41,7 @@ import org.estatio.dom.project.ProjectRolesContributions;
 import org.estatio.dom.project.Projects;
 import org.estatio.fixture.EstatioBaseLineFixture;
 import org.estatio.fixture.party.OrganisationForTopModel;
+import org.estatio.fixture.party.PersonForGinoVannelli;
 import org.estatio.fixture.party.PersonForJohnDoe;
 import org.estatio.fixture.project.ProjectsForGra;
 import org.estatio.fixture.project.ProjectsForKal;
@@ -44,7 +49,9 @@ import org.estatio.integtests.EstatioIntegrationTest;
 import org.joda.time.LocalDate;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class ProjectRolesTest extends EstatioIntegrationTest {
 	
@@ -158,5 +165,59 @@ public class ProjectRolesTest extends EstatioIntegrationTest {
 			assertThat(pr2.validateChangeDates(new LocalDate(2000,1,1), null), is("Same party, same role, cannot have overlapping period"));
 			assertNull(pr2.validateChangeDates(new LocalDate(2000,1,3), null));
     	}
+    }
+    
+    public static class OnPartyRemove extends ProjectRolesTest {
+
+        Party oldParty;
+        Party newParty;
+        Project project;
+    	ProjectRole pr;
+
+        @Rule
+        public ExpectedException expectedException = ExpectedException.none();
+
+        @Before
+        public void setUp() throws Exception {
+        	project = projects.findProject(ProjectsForKal.PROJECT_REFERENCE).get(0);
+            oldParty = parties.findPartyByReference(PersonForGinoVannelli.PARTY_REFERENCE);
+            newParty = parties.findPartyByReference(PersonForJohnDoe.PARTY_REFERENCE);
+            pr = projectRoles.createRole(project, ProjectRoleType.PROJECT_SENIORSUPPLIER, oldParty, new LocalDate(2000,1,2), null);
+        }
+
+        @Test
+        public void invalidBecauseNoReplacement() throws Exception {
+            // when
+            Party.RemoveEvent event = new RemoveEvent(oldParty, null, (Object[]) null);
+            event.setPhase(Phase.VALIDATE);
+            projectRoles.on(event);
+
+            // then
+            assertTrue(event.isInvalid());
+        }
+
+        @Test
+        public void executingReplacesParty() throws Exception {
+            // when
+        	assertThat(projectRoles.findByParty(oldParty).size(), is(1));
+            Party.RemoveEvent event = new RemoveEvent(oldParty, null, newParty);
+            event.setPhase(Phase.VALIDATE);
+            projectRoles.on(event);
+            event.setPhase(Phase.EXECUTING);
+            projectRoles.on(event);
+
+            // then
+            assertThat(projectRoles.findByParty(oldParty).size(), is(0));
+            assertThat(projectRoles.findByParty(newParty).size(), is(1));
+        }
+
+        @Test
+        public void whenVetoingSubscriber() {
+            // then
+            expectedException.expect(InvalidException.class);
+
+            // when
+            wrap(oldParty).remove();
+        }
     }
 }
