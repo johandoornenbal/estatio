@@ -19,7 +19,9 @@
 package org.estatio.integtests.projects;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
 
@@ -37,16 +39,12 @@ import org.estatio.dom.project.ProgramRoleType;
 import org.estatio.dom.project.ProgramRoles;
 import org.estatio.dom.project.ProgramRolesContributions;
 import org.estatio.dom.project.Programs;
-import org.estatio.dom.project.Project;
-import org.estatio.dom.project.ProjectRole;
-import org.estatio.dom.project.ProjectRoleType;
 import org.estatio.fixture.EstatioBaseLineFixture;
 import org.estatio.fixture.party.OrganisationForTopModel;
 import org.estatio.fixture.party.PersonForGinoVannelli;
 import org.estatio.fixture.party.PersonForJohnDoe;
 import org.estatio.fixture.project.ProgramForGra;
 import org.estatio.fixture.project.ProgramForKal;
-import org.estatio.fixture.project.ProjectsForKal;
 import org.estatio.integtests.EstatioIntegrationTest;
 import org.joda.time.LocalDate;
 import org.junit.Assert;

@@ -19,10 +19,10 @@
 package org.estatio.dom.project;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.UUID;
+
+import javax.inject.Inject;
 
 import org.apache.isis.applib.annotation.Action;
 import org.apache.isis.applib.annotation.ActionLayout;
@@ -32,6 +32,7 @@ import org.apache.isis.applib.annotation.DomainServiceLayout;
 import org.apache.isis.applib.annotation.NatureOfService;
 import org.apache.isis.applib.annotation.Programmatic;
 import org.apache.isis.applib.annotation.SemanticsOf;
+import org.apache.isis.applib.services.scratchpad.Scratchpad;
 import org.estatio.dom.EstatioDomainService;
 import org.estatio.dom.party.Party;
 import org.joda.time.LocalDate;
@@ -143,16 +144,17 @@ public class ProgramRoles extends EstatioDomainService<ProgramRole> {
 
         switch (ev.getEventPhase()) {
         case VALIDATE:
-            final List<ProgramRole> programRoles = findByParty(sourceParty);
+            List<ProgramRole> programRoles = findByParty(sourceParty);
 
             if (programRoles.size() > 0 && replacementParty == null) {
                 ev.invalidate("Party is being used in a program role: remove roles or provide a replacement");
+            } else {
+            	scratchpad.put(onPartyRemoveScratchpadKey = UUID.randomUUID(), programRoles);
             }
-
-            putProgramRole(ev, programRoles);
             break;
         case EXECUTING:
-            for (ProgramRole programRole : getProgramRoles(ev)) {
+        	programRoles = (List<ProgramRole>) scratchpad.get(onPartyRemoveScratchpadKey);
+            for (ProgramRole programRole : programRoles) {
                 programRole.setParty(replacementParty);
             }
             break;
@@ -161,17 +163,12 @@ public class ProgramRoles extends EstatioDomainService<ProgramRole> {
         }
     }
     
+    private transient UUID onPartyRemoveScratchpadKey;
+    
+    @Inject
+    private Scratchpad scratchpad;
+    
     // //////////////////////////////////////
-
-    private static final String KEY = ProgramRole.class.getName() + ".programRoles";
-
-    private static void putProgramRole(Party.RemoveEvent ev, List<ProgramRole> programRoles) {
-        ev.put(KEY, programRoles);
-    }
-
-    private static List<ProgramRole> getProgramRoles(Party.RemoveEvent ev) {
-        return (List<ProgramRole>) ev.get(KEY);
-    }
 
 }
 

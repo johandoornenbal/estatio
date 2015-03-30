@@ -20,6 +20,9 @@ package org.estatio.dom.project;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
+
+import javax.inject.Inject;
 
 import org.apache.isis.applib.annotation.Action;
 import org.apache.isis.applib.annotation.ActionLayout;
@@ -29,6 +32,7 @@ import org.apache.isis.applib.annotation.DomainServiceLayout;
 import org.apache.isis.applib.annotation.NatureOfService;
 import org.apache.isis.applib.annotation.Programmatic;
 import org.apache.isis.applib.annotation.SemanticsOf;
+import org.apache.isis.applib.services.scratchpad.Scratchpad;
 import org.estatio.dom.EstatioDomainService;
 import org.estatio.dom.party.Party;
 import org.joda.time.LocalDate;
@@ -146,16 +150,17 @@ public class ProjectRoles extends EstatioDomainService<ProjectRole> {
 
         switch (ev.getEventPhase()) {
         case VALIDATE:
-            final List<ProjectRole> projectRoles = findByParty(sourceParty);
+            List<ProjectRole> projectRoles = findByParty(sourceParty);
 
             if (projectRoles.size() > 0 && replacementParty == null) {
                 ev.invalidate("Party is being used in a project role: remove roles or provide a replacement");
+            } else {
+            	scratchpad.put(onPartyRemoveScratchpadKey = UUID.randomUUID(), projectRoles);
             }
-
-            putProjectRole(ev, projectRoles);
             break;
         case EXECUTING:
-            for (ProjectRole projectRole : getProjectRoles(ev)) {
+        	projectRoles = (List<ProjectRole>) scratchpad.get(onPartyRemoveScratchpadKey);
+            for (ProjectRole projectRole : projectRoles) {
                 projectRole.setParty(replacementParty);
             }
             break;
@@ -164,16 +169,9 @@ public class ProjectRoles extends EstatioDomainService<ProjectRole> {
         }
     }
     
-    // //////////////////////////////////////
-
-    private static final String KEY = ProjectRole.class.getName() + ".projectRoles";
-
-    private static void putProjectRole(Party.RemoveEvent ev, List<ProjectRole> projectRoles) {
-        ev.put(KEY, projectRoles);
-    }
-
-    private static List<ProjectRole> getProjectRoles(Party.RemoveEvent ev) {
-        return (List<ProjectRole>) ev.get(KEY);
-    }
+    private transient UUID onPartyRemoveScratchpadKey;
+    
+    @Inject
+    private Scratchpad scratchpad;
     
 }
