@@ -32,6 +32,7 @@ import org.apache.isis.applib.annotation.DomainServiceLayout;
 import org.apache.isis.applib.annotation.NatureOfService;
 import org.apache.isis.applib.annotation.Programmatic;
 import org.apache.isis.applib.annotation.SemanticsOf;
+import org.apache.isis.applib.services.eventbus.AbstractInteractionEvent.Phase;
 import org.apache.isis.applib.services.scratchpad.Scratchpad;
 import org.estatio.dom.EstatioDomainService;
 import org.estatio.dom.party.Party;
@@ -148,7 +149,7 @@ public class ProjectRoles extends EstatioDomainService<ProjectRole> {
         Party sourceParty = (Party) ev.getSource();
         Party replacementParty = ev.getReplacement();
 
-        switch (ev.getEventPhase()) {
+        switch (ev.getPhase()) {
         case VALIDATE:
             List<ProjectRole> projectRoles = findByParty(sourceParty);
 

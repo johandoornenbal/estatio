@@ -142,7 +142,7 @@ public class ProgramRoles extends EstatioDomainService<ProgramRole> {
         Party sourceParty = (Party) ev.getSource();
         Party replacementParty = ev.getReplacement();
 
-        switch (ev.getEventPhase()) {
+        switch (ev.getPhase()) {
         case VALIDATE:
             List<ProgramRole> programRoles = findByParty(sourceParty);
 

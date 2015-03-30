@@ -201,6 +201,7 @@ public class ProgramRolesTest extends EstatioIntegrationTest {
         public void executingReplacesParty() throws Exception {
             // when
         	assertThat(programRoles.findByParty(oldParty).size(), is(1));
+        	assertThat(programRoles.findByParty(newParty).size(), is(2));
             Party.RemoveEvent event = new RemoveEvent(oldParty, null, newParty);
             event.setPhase(Phase.VALIDATE);
             programRoles.on(event);
@@ -209,7 +210,7 @@ public class ProgramRolesTest extends EstatioIntegrationTest {
 
             // then
             assertThat(programRoles.findByParty(oldParty).size(), is(0));
-            assertThat(programRoles.findByParty(newParty).size(), is(1));
+            assertThat(programRoles.findByParty(newParty).size(), is(3));
         }
 
         @Test

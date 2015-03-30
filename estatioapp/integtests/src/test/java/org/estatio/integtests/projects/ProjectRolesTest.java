@@ -29,6 +29,7 @@ import javax.inject.Inject;
 
 import org.apache.isis.applib.fixturescripts.FixtureScript;
 import org.apache.isis.applib.services.eventbus.AbstractInteractionEvent.Phase;
+import org.apache.isis.applib.services.publish.EventType;
 import org.apache.isis.applib.services.wrapper.InvalidException;
 import org.estatio.dom.party.Parties;
 import org.estatio.dom.party.Party;
@@ -199,7 +200,8 @@ public class ProjectRolesTest extends EstatioIntegrationTest {
         @Test
         public void executingReplacesParty() throws Exception {
             // when
-        	assertThat(projectRoles.findByParty(oldParty).size(), is(1));
+        	assertThat(projectRoles.findByParty(oldParty).size(), is(2));
+        	assertThat(projectRoles.findByParty(newParty).size(), is(3));
             Party.RemoveEvent event = new RemoveEvent(oldParty, null, newParty);
             event.setPhase(Phase.VALIDATE);
             projectRoles.on(event);
@@ -208,7 +210,7 @@ public class ProjectRolesTest extends EstatioIntegrationTest {
 
             // then
             assertThat(projectRoles.findByParty(oldParty).size(), is(0));
-            assertThat(projectRoles.findByParty(newParty).size(), is(1));
+            assertThat(projectRoles.findByParty(newParty).size(), is(5));
         }
 
         @Test
