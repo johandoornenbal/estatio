@@ -60,6 +60,7 @@ public class BudgetKeyItemImportExportLineItem
         this.budgetKeyItem = budgetKeyItem;
         this.unitReference = budgetKeyItem.getUnit().getReference();
         this.keyValue = budgetKeyItem.getKeyValue();
+        this.augmentedKeyValue = budgetKeyItem.getAugmentedKeyValue();
         this.budgetKeyTableName = budgetKeyItem.getBudgetKeyTable().getName();
     }
 
@@ -67,7 +68,8 @@ public class BudgetKeyItemImportExportLineItem
         this.budgetKeyItem = item.budgetKeyItem;
         this.unitReference = item.unitReference;
         this.status = item.status;
-        this.keyValue = item.keyValue.setScale(3,BigDecimal.ROUND_HALF_DOWN); //TODO: does not help rounding to 3 decimals instead of 2
+        this.keyValue = item.keyValue.setScale(3,BigDecimal.ROUND_HALF_UP);
+        this.augmentedKeyValue = item.augmentedKeyValue.setScale(6,BigDecimal.ROUND_HALF_UP);
         this.budgetKeyTableName = item.budgetKeyTableName;
     }
 
@@ -106,6 +108,17 @@ public class BudgetKeyItemImportExportLineItem
         this.keyValue = keyValue;
     }
 
+    private BigDecimal augmentedKeyValue;
+
+    @Column(scale = 6)
+    public BigDecimal getAugmentedKeyValue() {
+        return augmentedKeyValue;
+    }
+
+    public void setAugmentedKeyValue(BigDecimal keyValue) {
+        this.augmentedKeyValue = keyValue;
+    }
+
     private String comments;
 
     public String getComments() {
@@ -141,6 +154,7 @@ public class BudgetKeyItemImportExportLineItem
             budgetKeyItem.setUnit(units.findUnitByReference(unitReference));
         }
         budgetKeyItems.findByBudgetKeyTableAndUnit(budgetKeyTables.findBudgetKeyTableByName(getBudgetKeyTableName()), units.findUnitByReference(unitReference)).changeKeyValue(this.getKeyValue().setScale(3,BigDecimal.ROUND_HALF_UP));
+        budgetKeyItems.findByBudgetKeyTableAndUnit(budgetKeyTables.findBudgetKeyTableByName(getBudgetKeyTableName()), units.findUnitByReference(unitReference)).changeAugmentedKeyValue(this.getAugmentedKeyValue().setScale(6, BigDecimal.ROUND_HALF_UP));
         return budgetKeyItem;
     }
 
@@ -153,7 +167,8 @@ public class BudgetKeyItemImportExportLineItem
             if (budgetKeyItem == null) {
                 newStatus = Status.ADDED;
             } else {
-                if (org.apache.commons.lang3.ObjectUtils.compare(keyValue, budgetKeyItem.getKeyValue()) != 0) {
+                if (org.apache.commons.lang3.ObjectUtils.compare(keyValue, budgetKeyItem.getKeyValue()) != 0 ||
+                        org.apache.commons.lang3.ObjectUtils.compare(augmentedKeyValue, budgetKeyItem.getAugmentedKeyValue()) != 0 ) {
                     newStatus = Status.UPDATED;
                 }
             }

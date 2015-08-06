@@ -19,6 +19,7 @@
 package org.estatio.dom.budget;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -29,6 +30,7 @@ import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.Query;
 import javax.jdo.annotations.VersionStrategy;
+
 
 import org.joda.time.LocalDate;
 
@@ -48,6 +50,8 @@ import org.apache.isis.applib.annotation.Where;
 
 import org.isisaddons.module.security.dom.tenancy.ApplicationTenancy;
 
+import org.estatio.app.budget.IdentifierValueInputPair;
+import org.estatio.app.budget.IdentifierValuesOutputObject;
 import org.estatio.dom.EstatioDomainObject;
 import org.estatio.dom.WithIntervalMutable;
 import org.estatio.dom.apptenancy.WithApplicationTenancyProperty;
@@ -312,29 +316,19 @@ public class BudgetKeyTable extends EstatioDomainObject<Budget> implements WithI
 
         for (Unit unit :  units.findByProperty(this.getProperty())){
 
-            BigDecimal denominator = BigDecimal.ZERO;
-            for (Unit u :  units.findByProperty(this.getProperty())) {
-                if (getFoundationValueType().valueOf(u) != null) {
-                    denominator = denominator.add(getFoundationValueType().valueOf(u));
-                }
-            }
-
-            BigDecimal numerator = BigDecimal.ZERO;
-            if (getFoundationValueType().valueOf(unit) != null) {
-                numerator = numerator.add(getFoundationValueType().valueOf(unit));
-            }
             BigDecimal sourceValue;
             if (getFoundationValueType().valueOf(unit) != null) {
                 sourceValue = getFoundationValueType().valueOf(unit);
             } else {
                 sourceValue = BigDecimal.ZERO;
             }
-            BigDecimal keyValue = getKeyValueMethod().calculate(numerator, denominator);
+
             budgetKeyItemsRepo.newBudgetKeyItem(
                     this,
                     unit,
                     sourceValue,
-                    keyValue);
+                    calculateKeyValue(unit),
+                    calculateKeyValue(unit));
 
         }
 
@@ -345,6 +339,83 @@ public class BudgetKeyTable extends EstatioDomainObject<Budget> implements WithI
     public String validateGenerateBudgetKeyItems(boolean confirmGenerate){
         return confirmGenerate? null:"Please confirm";
     }
+
+    //2nd method /////////////////////////////////
+
+    public BudgetKeyTable generateBudgetKeyItems2(
+            @ParameterLayout(named="Are you sure you want to delete all Budget Key Items and generate new ones?")
+            @Parameter(optionality= Optionality.OPTIONAL)
+            boolean confirmGenerate){
+
+        //delete old items
+        for (Iterator<BudgetKeyItem> it = this.getBudgetKeyItems().iterator(); it.hasNext();) {
+            it.next().deleteBudgetKeyItem();
+        }
+
+        ArrayList<IdentifierValueInputPair> input = new ArrayList<IdentifierValueInputPair>();
+
+        for (Unit unit :  units.findByProperty(this.getProperty())){
+            IdentifierValueInputPair newPair = new IdentifierValueInputPair(unit, unit.getArea());
+            input.add(newPair);
+        }
+
+        ArrayList<IdentifierValuesOutputObject> output = new ArrayList<IdentifierValuesOutputObject>();
+        output = getKeyValueMethod().generateKeyValues(input);
+
+        for (IdentifierValuesOutputObject outputObject : output) {
+
+            budgetKeyItemsRepo.newBudgetKeyItem(
+                    this,
+                    (Unit) outputObject.getIdentifier(),
+                    ((Unit) outputObject.getIdentifier()).getArea(),
+                    outputObject.getRoundedValue(),
+                    outputObject.getValue()
+                    );
+        }
+
+        return this;
+
+    }
+
+    public String validateGenerateBudgetKeyItems2(boolean confirmGenerate){
+        return confirmGenerate? null:"Please confirm";
+    }
+
+    //END 2nd method /////////////////////////////////
+
+    @Programmatic
+    private BigDecimal calculateKeyValue(Unit unit){
+
+        BigDecimal denominator = BigDecimal.ZERO;
+        for (Unit u :  units.findByProperty(this.getProperty())) {
+            if (getFoundationValueType().valueOf(u) != null) {
+                denominator = denominator.add(getFoundationValueType().valueOf(u));
+            }
+        }
+
+        BigDecimal numerator = BigDecimal.ZERO;
+        if (getFoundationValueType().valueOf(unit) != null) {
+            numerator = numerator.add(getFoundationValueType().valueOf(unit));
+        }
+
+        return  getKeyValueMethod().calculate(numerator, denominator);
+
+    }
+
+    // //////////////////////////////////////
+
+    public BudgetKeyTable correctBudgetKeyTable(
+            @ParameterLayout(named="Are you sure you want to recalculate this BudgetKeyTable?")
+            @Parameter(optionality= Optionality.OPTIONAL)
+            boolean confirmCorrect){
+
+        return getKeyValueMethod().correctKeyTable(this);
+    }
+
+    public String validateCorrectBudgetKeyTable(boolean confirmCorrect){
+        return confirmCorrect? null:"Please confirm";
+    }
+
 
     // //////////////////////////////////////
 

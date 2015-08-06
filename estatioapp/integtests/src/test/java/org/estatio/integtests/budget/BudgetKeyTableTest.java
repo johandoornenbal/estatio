@@ -24,14 +24,17 @@ import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.apache.isis.applib.fixturescripts.FixtureScript;
+
 import org.estatio.dom.asset.Unit;
 import org.estatio.dom.asset.Units;
 import org.estatio.dom.budget.BudgetFoundationValueType;
+import org.estatio.dom.budget.BudgetKeyItemContributions;
 import org.estatio.dom.budget.BudgetKeyItems;
 import org.estatio.dom.budget.BudgetKeyTable;
 import org.estatio.dom.budget.BudgetKeyTables;
 import org.estatio.dom.budget.BudgetKeyValueMethod;
-import org.estatio.fixture.EstatioOperationalTeardownFixture;
+import org.estatio.fixture.EstatioBaseLineFixture;
 import org.estatio.fixture.budget.BudgetKeyTablesForOxf;
 import org.estatio.integtests.EstatioIntegrationTest;
 
@@ -42,8 +45,14 @@ public class BudgetKeyTableTest extends EstatioIntegrationTest {
 
     @Before
     public void setupData() {
-        runFixtureScript(new EstatioOperationalTeardownFixture());
-        runFixtureScript(new BudgetKeyTablesForOxf());
+        runFixtureScript(new FixtureScript() {
+            @Override
+            protected void execute(final ExecutionContext executionContext) {
+                executionContext.executeChild(this, new EstatioBaseLineFixture());
+                executionContext.executeChild(this, new BudgetKeyTablesForOxf());
+
+            }
+        });
     }
 
     @Inject
@@ -139,12 +148,14 @@ public class BudgetKeyTableTest extends EstatioIntegrationTest {
     public static class validateNewBudgetKeyItemTest extends BudgetKeyTableTest {
 
         @Inject
-        BudgetKeyItems items;
+        BudgetKeyItemContributions items;
 
         @Inject
         Units units;
 
         BigDecimal newKeyValue;
+        BigDecimal newPositiveKeyValue;
+        BigDecimal newAugmentedKeyValue;
         Unit unit;
 
         @Test
@@ -156,9 +167,17 @@ public class BudgetKeyTableTest extends EstatioIntegrationTest {
 
             //when
             newKeyValue = new BigDecimal(-0.001);
+            newAugmentedKeyValue = new BigDecimal(-0.000001);
 
             // then
-            assertThat(items.validateNewBudgetKeyItem(budgetKeyTable, unit, newKeyValue).equals("keyValue cannot be less than zero"));
+            assertThat(items.validateNewBudgetKeyItem(budgetKeyTable, unit, newKeyValue, newAugmentedKeyValue).equals("keyValue cannot be less than zero"));
+
+            //when
+            newPositiveKeyValue = new BigDecimal(0.001);
+            newAugmentedKeyValue = new BigDecimal(-0.000001);
+
+            // then
+            assertThat(items.validateNewBudgetKeyItem(budgetKeyTable, unit, newKeyValue, newAugmentedKeyValue).equals("Augmented keyValue cannot be less than zero"));
 
         }
     }
