@@ -117,7 +117,7 @@ public class BudgetKeyTableTest extends EstatioIntegrationTest {
             budgetKeyTable = tables.findBudgetKeyTableByName(BudgetKeyTablesForOxf.NAME);
 
             //when
-            budgetKeyTable.generateBudgetKeyItems(true);
+            budgetKeyTable.generateBudgetKeyItems(true, false);
 
             //then
             assertThat(items.findByBudgetKeyTableAndUnit(budgetKeyTable, units.findUnitByReference("OXF-001")).getKeyValue().equals(new BigDecimal(3)));
@@ -134,7 +134,7 @@ public class BudgetKeyTableTest extends EstatioIntegrationTest {
             unit.setArea(null);
 
             //when
-            budgetKeyTable.generateBudgetKeyItems(true);
+            budgetKeyTable.generateBudgetKeyItems(true, false);
 
             //then
             assertThat(items.findByBudgetKeyTableAndUnit(budgetKeyTable, units.findUnitByReference("OXF-001")).getKeyValue().equals(BigDecimal.ZERO));

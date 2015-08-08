@@ -13,18 +13,21 @@ public class IdentifierValuesOutputObject {
             final Object identifier,
             final BigDecimal value,
             final BigDecimal roundedValue,
-            final BigDecimal delta
+            final BigDecimal delta,
+            final boolean corrected
             ) {
         this.identifier = identifier;
         this.value = value;
         this.roundedValue = roundedValue;
         this.delta = delta;
+        this.corrected = corrected;
     }
 
     private Object identifier;
     private BigDecimal value;
     private BigDecimal roundedValue;
     private BigDecimal delta;
+    private boolean corrected;
 
     public Object getIdentifier() {
         return identifier;
@@ -57,4 +60,14 @@ public class IdentifierValuesOutputObject {
     public void setDelta(final BigDecimal delta) {
         this.delta = delta;
     }
+
+    public boolean isCorrected() {
+        return corrected;
+    }
+
+    public void setCorrected(final boolean corrected) {
+        this.corrected = corrected;
+    }
+
+
 }

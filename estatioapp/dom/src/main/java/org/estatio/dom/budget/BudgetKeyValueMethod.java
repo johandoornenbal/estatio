@@ -25,6 +25,7 @@ import java.util.Iterator;
 
 import org.estatio.app.budget.IdentifierValueInputPair;
 import org.estatio.app.budget.IdentifierValuesOutputObject;
+import org.estatio.app.budget.Rounding;
 
 public enum BudgetKeyValueMethod {
     PROMILLE {
@@ -48,107 +49,13 @@ public enum BudgetKeyValueMethod {
             return sum.setScale(3, BigDecimal.ROUND_HALF_UP);
         }
         @Override
-        public BudgetKeyTable correctKeyTable(BudgetKeyTable budgetKeyTable){
-            if(keySum(budgetKeyTable).compareTo(new BigDecimal(1000)) > 0) {
+        public ArrayList<IdentifierValuesOutputObject> generateKeyValues(
+                final ArrayList<IdentifierValueInputPair> input,
+                final Rounding rounding,
+                final boolean useRoundingErrorCorrection) {
 
-                System.out.println("Positive delta found in sum of key values: ");
-                System.out.println(keySum(budgetKeyTable));
-                System.out.println("Finding largest negative delta and round down keyvalue");
+            return generateKeyValuesWithExpectedTotal(input, rounding, useRoundingErrorCorrection, new BigDecimal(1000.000));
 
-                //Find largest negative delta and round down keyvalue
-
-                BigDecimal largestNegativeDelta = BigDecimal.ZERO;
-                BudgetKeyItem itemToRoundDown = null;
-                for (Iterator<BudgetKeyItem> it = budgetKeyTable.getBudgetKeyItems().iterator(); it.hasNext();) {
-                    BudgetKeyItem item = it.next();
-                    if(item.delta().compareTo(largestNegativeDelta)<0){
-                        itemToRoundDown = item;
-                        System.out.println(itemToRoundDown.delta());
-                        System.out.println(itemToRoundDown.getKeyValue());
-                    }
-                }
-
-                itemToRoundDown.changeKeyValue(itemToRoundDown.getKeyValue().subtract(new BigDecimal(0.001)));
-                System.out.println("New keyValue");
-                System.out.println(itemToRoundDown.getKeyValue());
-
-            }
-
-            if(keySum(budgetKeyTable).compareTo(new BigDecimal(1000)) < 0) {
-
-                System.out.println("Negative delta found in sum of key values: ");
-                System.out.println(keySum(budgetKeyTable));
-                System.out.println("Finding largest positive delta and round up keyvalue");
-
-                //Find largest positive delta and round up keyvalue
-
-                BigDecimal largestDelta = BigDecimal.ZERO;
-                BudgetKeyItem itemToRoundUp = null;
-                for (Iterator<BudgetKeyItem> it = budgetKeyTable.getBudgetKeyItems().iterator(); it.hasNext();) {
-                    BudgetKeyItem item = it.next();
-                    if(item.delta().compareTo(largestDelta)>0){
-                        itemToRoundUp = item;
-                        System.out.println(itemToRoundUp.delta());
-                        System.out.println(itemToRoundUp.getKeyValue());
-                    }
-                }
-
-                itemToRoundUp.changeKeyValue(itemToRoundUp.getKeyValue().add(new BigDecimal(0.001)));
-                System.out.println("New keyValue");
-                System.out.println(itemToRoundUp.getKeyValue());
-
-            }
-
-            return budgetKeyTable;
-        }
-        @Override
-        public ArrayList<IdentifierValuesOutputObject> generateKeyValues(final ArrayList<IdentifierValueInputPair> input) {
-            BigDecimal denominator = BigDecimal.ZERO;
-            for (IdentifierValueInputPair pair : input) {
-                denominator = denominator.add(pair.getValue());
-            }
-
-            // check if rounding correction is needed
-            BigDecimal sumOfCalculatedRoundedValues = BigDecimal.ZERO;
-            boolean correctionNeeded = false;
-            BigDecimal deltaOfSum = BigDecimal.ZERO;
-            BigDecimal validTotal = new BigDecimal(1000.000).setScale(3, BigDecimal.ROUND_HALF_UP);
-            for (IdentifierValueInputPair inputPair : input) {
-                BigDecimal keyValue = calculate(inputPair.getValue(), denominator);
-                BigDecimal roundedKeyValue = keyValue.setScale(3, BigDecimal.ROUND_HALF_UP);
-                sumOfCalculatedRoundedValues = sumOfCalculatedRoundedValues.add(roundedKeyValue);
-            }
-            if (sumOfCalculatedRoundedValues.compareTo(validTotal) > 0) {
-                correctionNeeded = true;
-                System.out.println("positive delta: ");
-                deltaOfSum = deltaOfSum.add(sumOfCalculatedRoundedValues.subtract(validTotal));
-                System.out.println(deltaOfSum);
-            }
-            if (sumOfCalculatedRoundedValues.compareTo(validTotal) < 0) {
-                correctionNeeded = true;
-                System.out.println("negative delta: ");
-                deltaOfSum = deltaOfSum.add(sumOfCalculatedRoundedValues.subtract(validTotal));
-                System.out.println(deltaOfSum);
-            }
-            if (sumOfCalculatedRoundedValues.compareTo(validTotal) == 0) {
-                correctionNeeded = false;
-                System.out.println("no delta ");
-            }
-
-            ArrayList<IdentifierValuesOutputObject> output = new ArrayList<IdentifierValuesOutputObject>();
-            for (IdentifierValueInputPair inputPair : input) {
-                BigDecimal keyValue = calculate(inputPair.getValue(), denominator);
-                BigDecimal roundedKeyValue = keyValue.setScale(3, BigDecimal.ROUND_HALF_UP);
-                IdentifierValuesOutputObject newOutputObject = new IdentifierValuesOutputObject(
-                        inputPair.getIdentifier(),
-                        keyValue,
-                        roundedKeyValue,
-                        roundedKeyValue.subtract(keyValue)
-                );
-                output.add(newOutputObject);
-            }
-
-            return output;
         }
     },
     PERCENT {
@@ -172,31 +79,12 @@ public enum BudgetKeyValueMethod {
             return sum.setScale(3,BigDecimal.ROUND_HALF_UP);
         }
         @Override
-        public BudgetKeyTable correctKeyTable(BudgetKeyTable budgetKeyTable){
+        public ArrayList<IdentifierValuesOutputObject> generateKeyValues(
+                final ArrayList<IdentifierValueInputPair> input,
+                final Rounding rounding,
+                final boolean useRoundingErrorCorrection) {
 
-            return budgetKeyTable;
-        }
-        @Override
-        public ArrayList<IdentifierValuesOutputObject> generateKeyValues(final ArrayList<IdentifierValueInputPair> input) {
-            BigDecimal denominator = BigDecimal.ZERO;
-            for (IdentifierValueInputPair pair : input) {
-                denominator = denominator.add(pair.getValue());
-            }
-
-            ArrayList<IdentifierValuesOutputObject> output = new ArrayList<IdentifierValuesOutputObject>();
-            for (IdentifierValueInputPair inputPair : input) {
-                BigDecimal keyValue = calculate(inputPair.getValue(), denominator);
-                BigDecimal roundedKeyValue = keyValue.setScale(3, BigDecimal.ROUND_HALF_UP);
-                IdentifierValuesOutputObject newOutputObject = new IdentifierValuesOutputObject(
-                        inputPair.getIdentifier(),
-                        keyValue,
-                        roundedKeyValue,
-                        roundedKeyValue.subtract(keyValue)
-                );
-                output.add(newOutputObject);
-            }
-
-            return output;
+            return generateKeyValuesWithExpectedTotal(input, rounding, useRoundingErrorCorrection, new BigDecimal(100.000));
         }
     },
     DEFAULT {
@@ -217,26 +105,25 @@ public enum BudgetKeyValueMethod {
             return sum;
         }
         @Override
-        public BudgetKeyTable correctKeyTable(BudgetKeyTable budgetKeyTable){
+        public ArrayList<IdentifierValuesOutputObject> generateKeyValues(
+                final ArrayList<IdentifierValueInputPair> input,
+                final Rounding rounding,
+                final boolean useRoundingErrorCorrection) {
 
-            return budgetKeyTable;
-        }
-        @Override
-        public ArrayList<IdentifierValuesOutputObject> generateKeyValues(final ArrayList<IdentifierValueInputPair> input) {
-            BigDecimal denominator = BigDecimal.ZERO;
-            for (IdentifierValueInputPair pair : input) {
-                denominator = denominator.add(pair.getValue());
-            }
+            // for default method: no active denominator (so set to 1)
+            BigDecimal denominator = BigDecimal.ONE;
 
+            // create output object
             ArrayList<IdentifierValuesOutputObject> output = new ArrayList<IdentifierValuesOutputObject>();
             for (IdentifierValueInputPair inputPair : input) {
                 BigDecimal keyValue = calculate(inputPair.getValue(), denominator);
-                BigDecimal roundedKeyValue = keyValue.setScale(3, BigDecimal.ROUND_HALF_UP);
+                BigDecimal roundedKeyValue = keyValue.setScale(rounding.digits(), BigDecimal.ROUND_HALF_UP);
                 IdentifierValuesOutputObject newOutputObject = new IdentifierValuesOutputObject(
                         inputPair.getIdentifier(),
                         keyValue,
                         roundedKeyValue,
-                        roundedKeyValue.subtract(keyValue)
+                        roundedKeyValue.subtract(keyValue),
+                        false
                 );
                 output.add(newOutputObject);
             }
@@ -247,11 +134,179 @@ public enum BudgetKeyValueMethod {
 
     public abstract BigDecimal calculate(final BigDecimal numerator, final BigDecimal denominator);
 
-    public abstract ArrayList<IdentifierValuesOutputObject> generateKeyValues(final ArrayList<IdentifierValueInputPair> input);
+    public abstract ArrayList<IdentifierValuesOutputObject> generateKeyValues(
+            final ArrayList<IdentifierValueInputPair> input,
+            final Rounding rounding,
+            final boolean useRoundingErrorCorrection);
 
     public abstract boolean isValid(final BudgetKeyTable budgetKeyTable);
 
     public abstract BigDecimal keySum(final BudgetKeyTable budgetKeyTable);
 
-    public abstract BudgetKeyTable correctKeyTable(final BudgetKeyTable budgetKeyTable);
+    private enum Delta {
+        DELTA_POSITIVE,
+        DELTA_NEGATIVE,
+        NO_DELTA
+    }
+
+    BigDecimal calculateSumOfRoundedValues(
+            final ArrayList<IdentifierValueInputPair> input,
+            final BigDecimal denominator,
+            final Rounding rounding) {
+        BigDecimal sumOfCalculatedRoundedValues = BigDecimal.ZERO;
+        for (IdentifierValueInputPair inputPair : input) {
+            BigDecimal keyValue = calculate(inputPair.getValue(), denominator);
+            BigDecimal roundedKeyValue = BigDecimal.ZERO;
+            if (rounding == Rounding.DECIMAL2) {
+                roundedKeyValue = roundedKeyValue.add(keyValue.setScale(2, BigDecimal.ROUND_HALF_UP));
+            } else {
+                //DEFAULT
+                roundedKeyValue = roundedKeyValue.add(keyValue.setScale(3, BigDecimal.ROUND_HALF_UP));
+            }
+            sumOfCalculatedRoundedValues = sumOfCalculatedRoundedValues.add(roundedKeyValue);
+        }
+        return sumOfCalculatedRoundedValues;
+    }
+
+
+    ////////////////////////////////////////////
+
+    ArrayList<IdentifierValuesOutputObject> generateKeyValuesWithExpectedTotal(
+            final ArrayList<IdentifierValueInputPair> input,
+            final Rounding rounding,
+            final boolean useRoundingErrorCorrection,
+            final BigDecimal expectedTotalOfKeyValues) {
+
+        // determine denominator (sum of all input values)
+        BigDecimal denominator = BigDecimal.ZERO;
+        for (IdentifierValueInputPair pair : input) {
+            denominator = denominator.add(pair.getValue());
+        }
+
+        // create output object
+        ArrayList<IdentifierValuesOutputObject> output = new ArrayList<IdentifierValuesOutputObject>();
+        for (IdentifierValueInputPair inputPair : input) {
+            BigDecimal keyValue = calculate(inputPair.getValue(), denominator);
+            BigDecimal roundedKeyValue = keyValue.setScale(rounding.digits(), BigDecimal.ROUND_HALF_UP);
+            IdentifierValuesOutputObject newOutputObject = new IdentifierValuesOutputObject(
+                    inputPair.getIdentifier(),
+                    keyValue,
+                    roundedKeyValue,
+                    roundedKeyValue.subtract(keyValue),
+                    false
+            );
+            output.add(newOutputObject);
+        }
+
+        // if rounding error correction is asked for
+        if (useRoundingErrorCorrection) {
+            // 1. check if rounding correction is needed
+
+            BigDecimal sumOfCalculatedRoundedValues = BigDecimal.ZERO;
+            BigDecimal deltaOfSum = BigDecimal.ZERO;
+            Delta deltaSignOfSum = Delta.NO_DELTA;
+            BigDecimal validTotal = expectedTotalOfKeyValues.setScale(rounding.digits(), BigDecimal.ROUND_HALF_UP);
+
+            sumOfCalculatedRoundedValues = sumOfCalculatedRoundedValues
+                    .add(calculateSumOfRoundedValues(
+                                    input,
+                                    denominator,
+                                    rounding)
+                    );
+
+            if (sumOfCalculatedRoundedValues.compareTo(validTotal) > 0) {
+                deltaSignOfSum = Delta.DELTA_POSITIVE;
+                deltaOfSum = deltaOfSum.add(sumOfCalculatedRoundedValues.subtract(validTotal));
+                    /*debug*/
+                System.out.println("positive delta: ");
+                System.out.println(deltaOfSum);
+                    /*debug*/
+            }
+            if (sumOfCalculatedRoundedValues.compareTo(validTotal) < 0) {
+                deltaSignOfSum = Delta.DELTA_NEGATIVE;
+                deltaOfSum = deltaOfSum.add(sumOfCalculatedRoundedValues.subtract(validTotal));
+                    /*debug*/
+                System.out.println("negative delta: ");
+                System.out.println(deltaOfSum);
+                    /*debug*/
+            }
+
+            // 2. in case of rounding needed: iterate over sorted array until fixed
+            Integer numberOfIterationsNeeded = deltaOfSum.abs().multiply(rounding.baseFactor()).intValue();
+
+            for (int i = 0; i < numberOfIterationsNeeded; i = i + 1) {
+
+                if (deltaSignOfSum == Delta.DELTA_NEGATIVE) {
+
+                    //find largest (positive) delta in output Object and round up
+                    BigDecimal largestPositiveDelta = new BigDecimal(-1);
+                    IdentifierValuesOutputObject objectToRoundUp = null;
+                    for (IdentifierValuesOutputObject object : output) {
+                        if (object.getDelta().compareTo(largestPositiveDelta) > 0 && !object.isCorrected()) {
+                            objectToRoundUp = object;
+                                /*debug*/
+                            System.out.println("delta and roundedValue: ");
+                            System.out.println(objectToRoundUp.getDelta());
+                            System.out.println(objectToRoundUp.getRoundedValue());
+                                /*debug*/
+                        }
+                    }
+                    objectToRoundUp
+                            .setRoundedValue(
+                                    objectToRoundUp.getRoundedValue()
+                                            .add(rounding.correctionFactor())
+                                            .setScale(rounding.digits(), BigDecimal.ROUND_HALF_UP)
+                            );
+                    deltaOfSum = deltaOfSum.add(rounding.correctionFactor()).setScale(6, BigDecimal.ROUND_HALF_UP);
+                    objectToRoundUp.setCorrected(true);
+
+                        /*debug*/
+                    System.out.println("New keyRoundedValue");
+                    System.out.println(objectToRoundUp.getRoundedValue());
+                    System.out.println("New deltaOfSum");
+                    System.out.println(deltaOfSum);
+                        /*debug*/
+
+                } else {
+
+                    //find largest negative delta in output Object and round down
+                    BigDecimal largestNegativeDelta = BigDecimal.ONE;
+                    IdentifierValuesOutputObject objectToRoundDown = null;
+                    for (IdentifierValuesOutputObject object : output) {
+                        if (object.getDelta().compareTo(largestNegativeDelta) < 0 && !object.isCorrected()) {
+                            objectToRoundDown = object;
+                                /*debug*/
+                            System.out.println("delta and roundedValue: ");
+                            System.out.println(objectToRoundDown.getDelta());
+                            System.out.println(objectToRoundDown.getRoundedValue());
+                                /*debug*/
+                        }
+                    }
+                    objectToRoundDown
+                            .setRoundedValue(
+                                    objectToRoundDown.getRoundedValue()
+                                            .subtract(rounding.correctionFactor())
+                                            .setScale(rounding.digits(), BigDecimal.ROUND_HALF_UP)
+                            );
+                    deltaOfSum = deltaOfSum.subtract(rounding.correctionFactor()).setScale(6, BigDecimal.ROUND_HALF_UP);
+                    objectToRoundDown.setCorrected(true);
+
+                        /*debug*/
+                    System.out.println("New keyRoundedValue");
+                    System.out.println(objectToRoundDown.getRoundedValue());
+                    System.out.println("New deltaOfSum");
+                    System.out.println(deltaOfSum);
+                        /*debug*/
+
+                }
+
+            }
+
+        }
+
+        return output;
+    }
+
+    ////////////////////////////////////////////
+
 }

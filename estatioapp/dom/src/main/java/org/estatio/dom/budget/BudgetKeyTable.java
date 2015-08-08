@@ -52,6 +52,7 @@ import org.isisaddons.module.security.dom.tenancy.ApplicationTenancy;
 
 import org.estatio.app.budget.IdentifierValueInputPair;
 import org.estatio.app.budget.IdentifierValuesOutputObject;
+import org.estatio.app.budget.Rounding;
 import org.estatio.dom.EstatioDomainObject;
 import org.estatio.dom.WithIntervalMutable;
 import org.estatio.dom.apptenancy.WithApplicationTenancyProperty;
@@ -302,19 +303,28 @@ public class BudgetKeyTable extends EstatioDomainObject<Budget> implements WithI
         this.budgetKeyItems = budgetKeyItems;
     }
 
-    // //////////////////////////////////////
+    // /////////////////////////////////////
 
     public BudgetKeyTable generateBudgetKeyItems(
             @ParameterLayout(named="Are you sure you want to delete all Budget Key Items and generate new ones?")
             @Parameter(optionality= Optionality.OPTIONAL)
-            boolean confirmGenerate){
+            boolean confirmGenerate,
+            @ParameterLayout(named="Use rounding correction if needed to make this keyTable valid?")
+            @Parameter(optionality= Optionality.OPTIONAL)
+            boolean useRoundingCorrection){
 
         //delete old items
         for (Iterator<BudgetKeyItem> it = this.getBudgetKeyItems().iterator(); it.hasNext();) {
             it.next().deleteBudgetKeyItem();
         }
 
+        //create list of input pairs: identifier - sourcevalue
+        //sourcevalue is determined by BudgetFoundationValueType
+        ArrayList<IdentifierValueInputPair> input = new ArrayList<IdentifierValueInputPair>();
+
         for (Unit unit :  units.findByProperty(this.getProperty())){
+
+            //TODO: choose only active units in period and check for last change in units so that keytable is still valid
 
             BigDecimal sourceValue;
             if (getFoundationValueType().valueOf(unit) != null) {
@@ -322,52 +332,26 @@ public class BudgetKeyTable extends EstatioDomainObject<Budget> implements WithI
             } else {
                 sourceValue = BigDecimal.ZERO;
             }
-
-            budgetKeyItemsRepo.newBudgetKeyItem(
-                    this,
-                    unit,
-                    sourceValue,
-                    calculateKeyValue(unit),
-                    calculateKeyValue(unit));
-
-        }
-
-        return this;
-
-    }
-
-    public String validateGenerateBudgetKeyItems(boolean confirmGenerate){
-        return confirmGenerate? null:"Please confirm";
-    }
-
-    //2nd method /////////////////////////////////
-
-    public BudgetKeyTable generateBudgetKeyItems2(
-            @ParameterLayout(named="Are you sure you want to delete all Budget Key Items and generate new ones?")
-            @Parameter(optionality= Optionality.OPTIONAL)
-            boolean confirmGenerate){
-
-        //delete old items
-        for (Iterator<BudgetKeyItem> it = this.getBudgetKeyItems().iterator(); it.hasNext();) {
-            it.next().deleteBudgetKeyItem();
-        }
-
-        ArrayList<IdentifierValueInputPair> input = new ArrayList<IdentifierValueInputPair>();
-
-        for (Unit unit :  units.findByProperty(this.getProperty())){
-            IdentifierValueInputPair newPair = new IdentifierValueInputPair(unit, unit.getArea());
+            IdentifierValueInputPair newPair = new IdentifierValueInputPair(unit, sourceValue);
             input.add(newPair);
         }
 
+        //call generateKeyValues() method
         ArrayList<IdentifierValuesOutputObject> output = new ArrayList<IdentifierValuesOutputObject>();
-        output = getKeyValueMethod().generateKeyValues(input);
+        output = getKeyValueMethod().generateKeyValues(input, Rounding.DECIMAL3, useRoundingCorrection);
 
+        //map the returned list of outputObjects back to units and create budgetKeyItems
         for (IdentifierValuesOutputObject outputObject : output) {
+
+            BigDecimal sourceValue = BigDecimal.ZERO;
+            if (((Unit) outputObject.getIdentifier()).getArea() != null) {
+                sourceValue = sourceValue.add(((Unit) outputObject.getIdentifier()).getArea());
+            }
 
             budgetKeyItemsRepo.newBudgetKeyItem(
                     this,
                     (Unit) outputObject.getIdentifier(),
-                    ((Unit) outputObject.getIdentifier()).getArea(),
+                    sourceValue,
                     outputObject.getRoundedValue(),
                     outputObject.getValue()
                     );
@@ -377,7 +361,7 @@ public class BudgetKeyTable extends EstatioDomainObject<Budget> implements WithI
 
     }
 
-    public String validateGenerateBudgetKeyItems2(boolean confirmGenerate){
+    public String validateGenerateBudgetKeyItems(boolean confirmGenerate, boolean useRoundingCorrection){
         return confirmGenerate? null:"Please confirm";
     }
 
@@ -401,21 +385,6 @@ public class BudgetKeyTable extends EstatioDomainObject<Budget> implements WithI
         return  getKeyValueMethod().calculate(numerator, denominator);
 
     }
-
-    // //////////////////////////////////////
-
-    public BudgetKeyTable correctBudgetKeyTable(
-            @ParameterLayout(named="Are you sure you want to recalculate this BudgetKeyTable?")
-            @Parameter(optionality= Optionality.OPTIONAL)
-            boolean confirmCorrect){
-
-        return getKeyValueMethod().correctKeyTable(this);
-    }
-
-    public String validateCorrectBudgetKeyTable(boolean confirmCorrect){
-        return confirmCorrect? null:"Please confirm";
-    }
-
 
     // //////////////////////////////////////
 
