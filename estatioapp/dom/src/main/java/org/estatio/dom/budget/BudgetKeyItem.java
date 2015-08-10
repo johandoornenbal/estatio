@@ -96,7 +96,7 @@ public class BudgetKeyItem extends EstatioDomainObject<BudgetKeyItem> implements
 
     private BigDecimal sourceValue;
 
-    @javax.jdo.annotations.Column(allowsNull = "false", scale = 3)
+    @javax.jdo.annotations.Column(allowsNull = "false", scale = 2)
     @MemberOrder(sequence = "3")
     public BigDecimal getSourceValue() {
         return sourceValue;
@@ -169,6 +169,31 @@ public class BudgetKeyItem extends EstatioDomainObject<BudgetKeyItem> implements
         return null;
     }
 
+    //endregion
+
+    //region > corrected (property)
+    private boolean corrected;
+
+    @MemberOrder(sequence = "2.6")
+    @javax.jdo.annotations.Column(allowsNull = "true")
+    public boolean getCorrected() {
+        return corrected;
+    }
+
+    public void setCorrected(final boolean corrected) {
+        this.corrected = corrected;
+    }
+    //endregion
+
+    //region > deleteBudgetKeyItem
+    public BudgetKeyTable deleteBudgetKeyItem(@ParameterLayout(named = "Are you sure?") final boolean confirmDelete) {
+        removeIfNotAlready(this);
+        return this.getBudgetKeyTable();
+    }
+
+    public String validateDeleteBudgetKeyItem(boolean confirmDelete){
+        return confirmDelete? null:"Please confirm";
+    }
     //endregion
 
 

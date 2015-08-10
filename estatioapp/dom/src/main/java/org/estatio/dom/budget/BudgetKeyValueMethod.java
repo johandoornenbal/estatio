@@ -149,26 +149,6 @@ public enum BudgetKeyValueMethod {
         NO_DELTA
     }
 
-    BigDecimal calculateSumOfRoundedValues(
-            final ArrayList<IdentifierValueInputPair> input,
-            final BigDecimal denominator,
-            final Rounding rounding) {
-        BigDecimal sumOfCalculatedRoundedValues = BigDecimal.ZERO;
-        for (IdentifierValueInputPair inputPair : input) {
-            BigDecimal keyValue = calculate(inputPair.getValue(), denominator);
-            BigDecimal roundedKeyValue = BigDecimal.ZERO;
-            if (rounding == Rounding.DECIMAL2) {
-                roundedKeyValue = roundedKeyValue.add(keyValue.setScale(2, BigDecimal.ROUND_HALF_UP));
-            } else {
-                //DEFAULT
-                roundedKeyValue = roundedKeyValue.add(keyValue.setScale(3, BigDecimal.ROUND_HALF_UP));
-            }
-            sumOfCalculatedRoundedValues = sumOfCalculatedRoundedValues.add(roundedKeyValue);
-        }
-        return sumOfCalculatedRoundedValues;
-    }
-
-
     ////////////////////////////////////////////
 
     ArrayList<IdentifierValuesOutputObject> generateKeyValuesWithExpectedTotal(
@@ -200,25 +180,25 @@ public enum BudgetKeyValueMethod {
 
         // if rounding error correction is asked for
         if (useRoundingErrorCorrection) {
-            // 1. check if rounding correction is needed
 
+            // 1. check if rounding correction is needed
             BigDecimal sumOfCalculatedRoundedValues = BigDecimal.ZERO;
+            for (IdentifierValueInputPair inputPair : input) {
+                BigDecimal keyValue = calculate(inputPair.getValue(), denominator);
+                BigDecimal roundedKeyValue = keyValue.setScale(rounding.digits(), BigDecimal.ROUND_HALF_UP);
+                sumOfCalculatedRoundedValues = sumOfCalculatedRoundedValues.add(roundedKeyValue);
+            }
+
             BigDecimal deltaOfSum = BigDecimal.ZERO;
             Delta deltaSignOfSum = Delta.NO_DELTA;
             BigDecimal validTotal = expectedTotalOfKeyValues.setScale(rounding.digits(), BigDecimal.ROUND_HALF_UP);
-
-            sumOfCalculatedRoundedValues = sumOfCalculatedRoundedValues
-                    .add(calculateSumOfRoundedValues(
-                                    input,
-                                    denominator,
-                                    rounding)
-                    );
 
             if (sumOfCalculatedRoundedValues.compareTo(validTotal) > 0) {
                 deltaSignOfSum = Delta.DELTA_POSITIVE;
                 deltaOfSum = deltaOfSum.add(sumOfCalculatedRoundedValues.subtract(validTotal));
                     /*debug*/
-                System.out.println("positive delta: ");
+                System.out.println("***************************");
+                System.out.print("positive delta: ");
                 System.out.println(deltaOfSum);
                     /*debug*/
             }
@@ -226,7 +206,8 @@ public enum BudgetKeyValueMethod {
                 deltaSignOfSum = Delta.DELTA_NEGATIVE;
                 deltaOfSum = deltaOfSum.add(sumOfCalculatedRoundedValues.subtract(validTotal));
                     /*debug*/
-                System.out.println("negative delta: ");
+                System.out.println("***************************");
+                System.out.print("negative delta: ");
                 System.out.println(deltaOfSum);
                     /*debug*/
             }
@@ -244,11 +225,6 @@ public enum BudgetKeyValueMethod {
                     for (IdentifierValuesOutputObject object : output) {
                         if (object.getDelta().compareTo(largestPositiveDelta) > 0 && !object.isCorrected()) {
                             objectToRoundUp = object;
-                                /*debug*/
-                            System.out.println("delta and roundedValue: ");
-                            System.out.println(objectToRoundUp.getDelta());
-                            System.out.println(objectToRoundUp.getRoundedValue());
-                                /*debug*/
                         }
                     }
                     objectToRoundUp
@@ -257,13 +233,15 @@ public enum BudgetKeyValueMethod {
                                             .add(rounding.correctionFactor())
                                             .setScale(rounding.digits(), BigDecimal.ROUND_HALF_UP)
                             );
-                    deltaOfSum = deltaOfSum.add(rounding.correctionFactor()).setScale(6, BigDecimal.ROUND_HALF_UP);
+                    deltaOfSum = deltaOfSum.add(rounding.correctionFactor()).setScale(rounding.digits()+3, BigDecimal.ROUND_HALF_UP);
                     objectToRoundUp.setCorrected(true);
 
                         /*debug*/
-                    System.out.println("New keyRoundedValue");
+                    System.out.print("Identifier: ");
+                    System.out.println(objectToRoundUp.getIdentifier());
+                    System.out.print("New keyRoundedValue: ");
                     System.out.println(objectToRoundUp.getRoundedValue());
-                    System.out.println("New deltaOfSum");
+                    System.out.print("New deltaOfSum: ");
                     System.out.println(deltaOfSum);
                         /*debug*/
 
@@ -275,11 +253,6 @@ public enum BudgetKeyValueMethod {
                     for (IdentifierValuesOutputObject object : output) {
                         if (object.getDelta().compareTo(largestNegativeDelta) < 0 && !object.isCorrected()) {
                             objectToRoundDown = object;
-                                /*debug*/
-                            System.out.println("delta and roundedValue: ");
-                            System.out.println(objectToRoundDown.getDelta());
-                            System.out.println(objectToRoundDown.getRoundedValue());
-                                /*debug*/
                         }
                     }
                     objectToRoundDown
@@ -288,13 +261,15 @@ public enum BudgetKeyValueMethod {
                                             .subtract(rounding.correctionFactor())
                                             .setScale(rounding.digits(), BigDecimal.ROUND_HALF_UP)
                             );
-                    deltaOfSum = deltaOfSum.subtract(rounding.correctionFactor()).setScale(6, BigDecimal.ROUND_HALF_UP);
+                    deltaOfSum = deltaOfSum.subtract(rounding.correctionFactor()).setScale(rounding.digits()+3, BigDecimal.ROUND_HALF_UP);
                     objectToRoundDown.setCorrected(true);
 
                         /*debug*/
-                    System.out.println("New keyRoundedValue");
+                    System.out.print("Identifier: ");
+                    System.out.println(objectToRoundDown.getIdentifier());
+                    System.out.print("New keyRoundedValue: ");
                     System.out.println(objectToRoundDown.getRoundedValue());
-                    System.out.println("New deltaOfSum");
+                    System.out.print("New deltaOfSum: ");
                     System.out.println(deltaOfSum);
                         /*debug*/
 

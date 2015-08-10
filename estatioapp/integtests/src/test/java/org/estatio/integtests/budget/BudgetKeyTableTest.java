@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Assert;
 
 import org.apache.isis.applib.fixturescripts.FixtureScript;
 
@@ -80,7 +81,7 @@ public class BudgetKeyTableTest extends EstatioIntegrationTest {
             assertThat(budgetKeyTable.getEndDate().equals(BudgetKeyTablesForOxf.ENDDATE));
             assertThat(budgetKeyTable.getFoundationValueType().equals(BudgetKeyTablesForOxf.BUDGET_FOUNDATION_VALUE_TYPE));
             assertThat(budgetKeyTable.getKeyValueMethod().equals(BudgetKeyTablesForOxf.BUDGET_KEY_VALUE_METHOD));
-            assertThat(budgetKeyTable.isValid() == true);
+            assertThat(budgetKeyTable.isValidForKeyValues() == true);
 
 
             //when
@@ -96,7 +97,7 @@ public class BudgetKeyTableTest extends EstatioIntegrationTest {
             assertThat(budgetKeyTable.getFoundationValueType().equals(BudgetFoundationValueType.COUNT));
             assertThat(budgetKeyTable.getKeyValueMethod().equals(BudgetKeyValueMethod.DEFAULT));
             //due to changing BudgetKeyValueMethod
-            assertThat(budgetKeyTable.isValid() == false);
+            assertThat(budgetKeyTable.isValidForKeyValues() == false);
         }
 
 
@@ -124,21 +125,73 @@ public class BudgetKeyTableTest extends EstatioIntegrationTest {
             assertThat(items.findByBudgetKeyTableAndUnit(budgetKeyTable, units.findUnitByReference("OXF-002")).getKeyValue().equals(new BigDecimal(6)));
         }
 
-        Unit unit;
+        Unit unitWithAreaNull;
         @Test
         public void whenSetUpWithNullValues() throws Exception {
 
             //given
             budgetKeyTable = tables.findBudgetKeyTableByName(BudgetKeyTablesForOxf.NAME);
-            unit = units.findUnitByReference("OXF-001");
-            unit.setArea(null);
+            unitWithAreaNull = units.findUnitByReference("OXF-001");
+            unitWithAreaNull.setArea(null);
 
             //when
             budgetKeyTable.generateBudgetKeyItems(true, false);
 
             //then
-            assertThat(items.findByBudgetKeyTableAndUnit(budgetKeyTable, units.findUnitByReference("OXF-001")).getKeyValue().equals(BigDecimal.ZERO));
+            assertThat(items.findByBudgetKeyTableAndUnit(budgetKeyTable, unitWithAreaNull).getKeyValue().equals(BigDecimal.ZERO));
             assertThat(items.findByBudgetKeyTableAndUnit(budgetKeyTable, units.findUnitByReference("OXF-002")).getKeyValue().equals(new BigDecimal(6)));
+        }
+
+        Unit unitNotIncluded;
+        Unit unitNotIncludedWithEndDateOnly;
+        Unit unitNotIncludedWithStartDateOnly;
+        Unit unitIncluded;
+        Unit unitIncludedWithEndDateOnly;
+        Unit unitIncludedWithStartDateOnly;
+        Unit unitIncludedWithoutStartAndEndDate;
+        @Test
+        public void whenSetUpWithUnitsNotInKeyTablePeriod() throws Exception {
+
+            //given
+            budgetKeyTable = tables.findBudgetKeyTableByName(BudgetKeyTablesForOxf.NAME);
+
+            //when
+            unitNotIncludedWithEndDateOnly = units.findUnitByReference("OXF-001");
+            unitNotIncludedWithEndDateOnly.setStartDate(null);
+            unitNotIncludedWithEndDateOnly.setEndDate(new LocalDate(2015, 12, 30));
+            unitNotIncluded = units.findUnitByReference("OXF-002");
+            unitNotIncluded.setStartDate(new LocalDate(2015, 01, 01));
+            unitNotIncluded.setEndDate(new LocalDate(2015, 12, 30));
+            unitNotIncludedWithStartDateOnly = units.findUnitByReference("OXF-003");
+            unitNotIncludedWithStartDateOnly.setStartDate(new LocalDate(2015, 01, 02));
+            unitNotIncludedWithStartDateOnly.setEndDate(null);
+
+            unitIncluded = units.findUnitByReference("OXF-004");
+            unitIncluded.setStartDate(new LocalDate(2015, 01, 01));
+            unitIncluded.setEndDate(new LocalDate(2015, 12, 31));
+            unitIncludedWithEndDateOnly = units.findUnitByReference("OXF-005");
+            unitIncludedWithEndDateOnly.setStartDate(null);
+            unitIncludedWithEndDateOnly.setEndDate(new LocalDate(2015, 12, 31));
+            unitIncludedWithStartDateOnly = units.findUnitByReference("OXF-006");
+            unitIncludedWithStartDateOnly.setStartDate(new LocalDate(2015,01,01));
+            unitIncludedWithStartDateOnly.setEndDate(null);
+            unitIncludedWithoutStartAndEndDate = units.findUnitByReference("OXF-007");
+            unitIncludedWithoutStartAndEndDate.setStartDate(null);
+            unitIncludedWithoutStartAndEndDate.setEndDate(null);
+
+            budgetKeyTable.generateBudgetKeyItems(true, false);
+
+            //then
+            assertThat(budgetKeyTable.getStartDate().equals(new LocalDate(2015,01,01)));
+            assertThat(budgetKeyTable.getStartDate().equals(new LocalDate(2015,12,31)));
+            Assert.assertNull(items.findByBudgetKeyTableAndUnit(budgetKeyTable, unitNotIncludedWithEndDateOnly));
+            Assert.assertNull(items.findByBudgetKeyTableAndUnit(budgetKeyTable, unitNotIncluded));
+            Assert.assertNull(items.findByBudgetKeyTableAndUnit(budgetKeyTable, unitNotIncludedWithStartDateOnly));
+            assertThat(items.findByBudgetKeyTableAndUnit(budgetKeyTable, unitIncluded).getKeyValue().equals(new BigDecimal(6)));
+            assertThat(items.findByBudgetKeyTableAndUnit(budgetKeyTable, unitIncludedWithEndDateOnly).getKeyValue().equals(new BigDecimal(6)));
+            assertThat(items.findByBudgetKeyTableAndUnit(budgetKeyTable, unitIncludedWithStartDateOnly).getKeyValue().equals(new BigDecimal(6)));
+            assertThat(items.findByBudgetKeyTableAndUnit(budgetKeyTable, unitIncludedWithoutStartAndEndDate).getKeyValue().equals(new BigDecimal(6)));
+
         }
 
 
@@ -181,4 +234,6 @@ public class BudgetKeyTableTest extends EstatioIntegrationTest {
 
         }
     }
+
+
 }

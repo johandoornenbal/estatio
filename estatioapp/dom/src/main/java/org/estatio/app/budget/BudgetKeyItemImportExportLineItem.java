@@ -26,6 +26,7 @@ import org.apache.isis.applib.annotation.Action;
 import org.apache.isis.applib.annotation.BookmarkPolicy;
 import org.apache.isis.applib.annotation.DomainObjectLayout;
 import org.apache.isis.applib.annotation.InvokeOn;
+import org.apache.isis.applib.annotation.MemberOrder;
 import org.apache.isis.applib.annotation.Programmatic;
 import org.apache.isis.applib.annotation.SemanticsOf;
 import org.apache.isis.applib.annotation.ViewModel;
@@ -59,6 +60,7 @@ public class BudgetKeyItemImportExportLineItem
     public BudgetKeyItemImportExportLineItem(final BudgetKeyItem budgetKeyItem) {
         this.budgetKeyItem = budgetKeyItem;
         this.unitReference = budgetKeyItem.getUnit().getReference();
+        this.sourceValue = budgetKeyItem.getSourceValue();
         this.keyValue = budgetKeyItem.getKeyValue();
         this.augmentedKeyValue = budgetKeyItem.getAugmentedKeyValue();
         this.budgetKeyTableName = budgetKeyItem.getBudgetKeyTable().getName();
@@ -68,6 +70,7 @@ public class BudgetKeyItemImportExportLineItem
         this.budgetKeyItem = item.budgetKeyItem;
         this.unitReference = item.unitReference;
         this.status = item.status;
+        this.sourceValue = item.sourceValue.setScale(2, BigDecimal.ROUND_HALF_UP);
         this.keyValue = item.keyValue.setScale(3,BigDecimal.ROUND_HALF_UP);
         this.augmentedKeyValue = item.augmentedKeyValue.setScale(6,BigDecimal.ROUND_HALF_UP);
         this.budgetKeyTableName = item.budgetKeyTableName;
@@ -79,6 +82,7 @@ public class BudgetKeyItemImportExportLineItem
 
     private String budgetKeyTableName;
 
+    @MemberOrder(sequence = "1")
     public String getBudgetKeyTableName() { return budgetKeyTableName; }
 
     public void setBudgetKeyTableName(final String budgetKeyTableName) {
@@ -89,6 +93,7 @@ public class BudgetKeyItemImportExportLineItem
 
     private String unitReference;
 
+    @MemberOrder(sequence = "2")
     public String getUnitReference() {
         return unitReference;
     }
@@ -97,9 +102,22 @@ public class BudgetKeyItemImportExportLineItem
         this.unitReference = unitReference;
     }
 
+    private BigDecimal sourceValue;
+
+    @Column(scale = 2)
+    @MemberOrder(sequence = "3")
+    public BigDecimal getSourceValue() {
+        return sourceValue;
+    }
+
+    public void setSourceValue(final BigDecimal sourceValue) {
+        this.sourceValue = sourceValue;
+    }
+
     private BigDecimal keyValue;
 
     @Column(scale = 3)
+    @MemberOrder(sequence = "4")
     public BigDecimal getKeyValue() {
         return keyValue;
     }
@@ -111,6 +129,7 @@ public class BudgetKeyItemImportExportLineItem
     private BigDecimal augmentedKeyValue;
 
     @Column(scale = 6)
+    @MemberOrder(sequence = "5")
     public BigDecimal getAugmentedKeyValue() {
         return augmentedKeyValue;
     }
@@ -121,6 +140,7 @@ public class BudgetKeyItemImportExportLineItem
 
     private String comments;
 
+    @MemberOrder(sequence = "7")
     public String getComments() {
         return comments;
     }
@@ -131,6 +151,7 @@ public class BudgetKeyItemImportExportLineItem
 
     private Status status;
 
+    @MemberOrder(sequence = "6")
     public Status getStatus() {
         return status;
     }
@@ -155,6 +176,7 @@ public class BudgetKeyItemImportExportLineItem
         }
         budgetKeyItems.findByBudgetKeyTableAndUnit(budgetKeyTables.findBudgetKeyTableByName(getBudgetKeyTableName()), units.findUnitByReference(unitReference)).changeKeyValue(this.getKeyValue().setScale(3,BigDecimal.ROUND_HALF_UP));
         budgetKeyItems.findByBudgetKeyTableAndUnit(budgetKeyTables.findBudgetKeyTableByName(getBudgetKeyTableName()), units.findUnitByReference(unitReference)).changeAugmentedKeyValue(this.getAugmentedKeyValue().setScale(6, BigDecimal.ROUND_HALF_UP));
+        budgetKeyItems.findByBudgetKeyTableAndUnit(budgetKeyTables.findBudgetKeyTableByName(getBudgetKeyTableName()), units.findUnitByReference(unitReference)).setSourceValue(this.getSourceValue().setScale(2, BigDecimal.ROUND_HALF_UP));
         return budgetKeyItem;
     }
 

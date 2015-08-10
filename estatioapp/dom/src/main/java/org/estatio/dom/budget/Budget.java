@@ -203,7 +203,7 @@ public class Budget extends EstatioDomainObject<Budget> implements WithIntervalM
 
     @Action()
     @ActionLayout()
-    public Budget removeAllBudgetItems() {
+    public Budget removeAllBudgetItems(@ParameterLayout(named = "Are you sure?") final boolean confirmDelete) {
         for (BudgetItem budgetItem : this.getBudgetItems()) {
 
             getContainer().remove(budgetItem);
@@ -212,5 +212,9 @@ public class Budget extends EstatioDomainObject<Budget> implements WithIntervalM
         }
 
         return this;
+    }
+
+    public String validateRemoveAllBudgetItems(boolean confirmDelete){
+        return confirmDelete? null:"Please confirm";
     }
 }
